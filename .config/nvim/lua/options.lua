@@ -39,8 +39,13 @@ vim.opt.scrolloff = 8                           -- minimal number of screen line
 vim.opt.sidescrolloff = 8                       -- minimal number of screen columns either side of cursor if wrap is `false`
 vim.opt.guifont = "monospace:h17"               -- the font used in graphical neovim applications
 vim.opt.whichwrap = "bs<>[]hl"                  -- which "horizontal" keys are allowed to travel to prev/next line
-vim.opt.foldmethod = "marker"                   -- 代码折叠 za zM zR 
-
+-- vim.opt.foldmethod = "marker"                   -- 代码折叠 za zM zR 
+-- 启用 treesitter 折叠
+vim.opt.foldmethod = "expr"
+vim.opt.foldexpr   = "nvim_treesitter#foldexpr()"
+-- 可选项（推荐加上）
+vim.opt.foldenable = true   -- 启动时开启折叠
+vim.opt.foldlevel  = 99     -- 默认展开大部分，避免文件全折叠
 
 -- vim.opt.shortmess = "ilmnrx"                 -- flags to shorten vim messages, see :help 'shortmess'
 vim.opt.shortmess:append "c"                           -- don't give |ins-completion-menu| messages

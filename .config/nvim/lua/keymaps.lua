@@ -114,8 +114,7 @@ keymap("n", "<leader>fm", "<cmd>Telescope treesitter<cr>", opts("Find symbols in
 -- t: test
 keymap("n", "<leader>tt", "<cmd>lua require('neotest').run.run()<cr>", opts("Test"))
 keymap("n", "<leader>tf", "<cmd>lua require('neotest').run.run(vim.fn.expand('%'))<cr>", opts("Test file"))
-keymap("n", "<leader>to", "<cmd>lua require('neotest').output.open({ enter = false, float = true })<cr>",
-    opts("Test output"))
+keymap("n", "<leader>to", "<cmd>lua require('neotest').output.open({ enter = false, float = true })<cr>", opts("Test output"))
 keymap("n", "<leader>tl", "<cmd>lua require('neotest').summary.toggle()<cr>", opts("Test summary"))
 keymap("n", "<leader>td", "<cmd>lua require('neotest').run.run({strategy = 'dap'})<cr>", opts("Test dap"))
 keymap("n", "<leader>tp", "<cmd>lua require('neotest').output_panel.toggle()<cr>", opts("Test panel"))
@@ -128,11 +127,6 @@ keymap("n", "<leader>qp", ":cprev<CR>", { desc = "Quickfix Prev" })
 
 -- other
 -- windows
-keymap("n", "<space>h", "<c-w>h", opts("Go to the left window"))
-keymap("n", "<space>j", "<c-w>j", opts("Go to the down window"))
-keymap("n", "<space>k", "<c-w>k", opts("Go to the up window"))
-keymap("n", "<space>l", "<c-w>l", opts("Go to the right window"))
-keymap("n", "<space>t", "<c-w>t", opts("Go to the top window"))
 keymap("n", "<space>-", "<cmd>split<cr>", opts("split"))
 keymap("n", "<space>|", "<cmd>vsplit<cr>", opts("vsplit"))
 keymap("n", "<space>q", "<cmd>bprevious<cr>:bdelete #<cr>", opts("delete buffer"))
