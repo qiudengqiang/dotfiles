@@ -7,8 +7,8 @@ local keymap = vim.keymap.set
 
 --Remap space as leader key
 --keymap("", ",", "<Nop>", opts("leader"))
-vim.g.mapleader = ","      -- set leader to space
-vim.g.maplocalleader = "," -- set local leader to space
+vim.g.mapleader = " "      -- set leader to space
+vim.g.maplocalleader = " " -- set local leader to space
 
 
 -- Custome --
@@ -127,12 +127,13 @@ keymap("n", "<leader>qp", ":cprev<CR>", { desc = "Quickfix Prev" })
 
 -- other
 -- windows
-keymap("n", "<space>-", "<cmd>split<cr>", opts("split"))
-keymap("n", "<space>|", "<cmd>vsplit<cr>", opts("vsplit"))
-keymap("n", "<space>q", "<cmd>bprevious<cr>:bdelete #<cr>", opts("delete buffer"))
-keymap("n", "<space>;", "<cmd>noh<cr>", opts("clear search"))
-keymap("n", "<space>f", "<cmd>Telescope find_files<cr>", opts("find files"))
-keymap("n", "<space>g", "<cmd>Telescope live_grep<cr>", opts("live grep"))
-keymap("n", "<space>b", "<cmd>Telescope buffers<cr>", opts("buffers"))
+keymap("n", "<Space><Space>", "<cmd>NvimTreeFindFileToggle<cr>", opts("nvim tree"))
+keymap("n", "<Space>-", "<cmd>split<cr>", opts("split"))
+keymap("n", "<Space>|", "<cmd>vsplit<cr>", opts("vsplit"))
+keymap("n", "<Space>q", "<cmd>bprevious<cr>:bdelete #<cr>", opts("delete buffer"))
+keymap("n", "<Space>;", "<cmd>noh<cr>", opts("clear search"))
+keymap("n", "<Space>f", "<cmd>Telescope find_files<cr>", opts("find files"))
+keymap("n", "<Space>g", "<cmd>Telescope live_grep<cr>", opts("live grep"))
+keymap("n", "<Space>b", "<cmd>Telescope buffers<cr>", opts("buffers"))
 keymap("n", "]c", "<cmd>Gitsigns next_hunk<CR>", opts("git: Next hunk"))
 keymap("n", "[c", "<cmd>Gitsigns prev_hunk<CR>", opts("git: Pre hunk"))
