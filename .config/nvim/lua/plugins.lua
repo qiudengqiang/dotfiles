@@ -25,7 +25,12 @@ require("lazy").setup({
 
     -- git
     { 'tpope/vim-fugitive'},
-    { 'lewis6991/gitsigns.nvim', config = function() require('gitsigns').setup() end },
+    { 'lewis6991/gitsigns.nvim', config = function() require('gitsigns').setup({
+      signcolumn = true,
+      numhl      = false,
+      linehl     = false,
+      word_diff  = false,
+    }) end },
     { 'sindrets/diffview.nvim', requires = 'nvim-lua/plenary.nvim' },
 
     -- ui
@@ -71,4 +76,11 @@ require("lazy").setup({
     { "folke/flash.nvim", event = "BufEnter" },
     { "folke/which-key.nvim", requires = { "echasnovski/mini.nvim" }, event = "BufEnter" },
     { "folke/todo-comments.nvim", requires = "nvim-lua/plenary.nvim" },
+
+    -- {{{ debug, test
+    { "mfussenegger/nvim-dap"},
+    { "rcarriga/nvim-dap-ui" },
+    { "leoluz/nvim-dap-go" },
+    { "theHamsta/nvim-dap-virtual-text" },
+    { "nvim-telescope/telescope-dap.nvim" },
 })

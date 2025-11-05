@@ -119,6 +119,25 @@ keymap("n", "<leader>tl", "<cmd>lua require('neotest').summary.toggle()<cr>", op
 keymap("n", "<leader>td", "<cmd>lua require('neotest').run.run({strategy = 'dap'})<cr>", opts("Test dap"))
 keymap("n", "<leader>tp", "<cmd>lua require('neotest').output_panel.toggle()<cr>", opts("Test panel"))
 
+-- d: debug
+-- https://code.visualstudio.com/docs/editor/debugging#_debug-actions
+keymap("n", "<leader>dt", function() require('dap-go').debug_test() end, opts("Debug test"))
+keymap("n", "<leader>dl", function() require('dap').run_last() end, opts("Debug last"))
+keymap("n", "<leader>dB", function() require('dap').set_breakpoint(nil, nil, vim.fn.input("log point message: ")) end, opts("Debug log point"))
+keymap("n", "<leader>db", function() require('dap').toggle_breakpoint() end, opts("Debug breakpoint"))
+keymap("n", "<leader>dk", function() require('dapui').eval() end, opts("Debug eval"))
+keymap("n", "<leader>df", function() require('dapui').float_element() end, opts("Debug float"))
+keymap("n", "<f1>",       function() require('dap-go').debug_test() end, opts("Debug test"))
+keymap("n", "<f2>",       function() require('dapui').toggle() end, opts("Debug UI"))
+keymap("n", "<f5>",       function() require('dap').continue() end, opts("Debug continue"))
+keymap("n", "<f6>",       function() require('dap').step_over() end, opts("Debug step over"))
+keymap("n", "<f7>",       function() require('dap').step_into() end, opts("Debug step into"))
+keymap("n", "<f8>",       function() require('dap').step_out() end, opts("Debug step out"))
+keymap("n", "<f9>",       function() require('dap').up() end, opts("Debug up"))
+keymap("n", "<s-f9>",     function() require('dap').down() end, opts("Debug down"))
+keymap("n", "<s-f5>",     function() require('dap').terminate() end, opts("Debug terminate"))
+keymap("n", "<cs-f5>",    function() require('dap').restart() end, opts("Debug restart"))
+
 -- quickfix
 keymap("n", "<leader>qo", ":copen<CR>", { desc = "Quickfix Open" })
 keymap("n", "<leader>qc", ":cclose<CR>", { desc = "Quickfix Close" })
