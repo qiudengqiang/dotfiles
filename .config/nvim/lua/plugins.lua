@@ -25,12 +25,7 @@ require("lazy").setup({
 
     -- git
     { 'tpope/vim-fugitive'},
-    { 'lewis6991/gitsigns.nvim', config = function() require('gitsigns').setup({
-      signcolumn = true,
-      numhl      = false,
-      linehl     = false,
-      word_diff  = false,
-    }) end },
+    { 'lewis6991/gitsigns.nvim', require = {'gitsigns'} },
     { 'sindrets/diffview.nvim', requires = 'nvim-lua/plenary.nvim' },
 
     -- ui
@@ -50,6 +45,7 @@ require("lazy").setup({
     { "L3MON4D3/LuaSnip" },
     { "hrsh7th/cmp-nvim-lsp" },
     { "hrsh7th/cmp-nvim-lua" },
+    { "zbirenbaum/copilot.lua" },
 
     -- LSP
     { "neovim/nvim-lspconfig" }, -- enable LSP
@@ -57,7 +53,6 @@ require("lazy").setup({
     { "williamboman/mason-lspconfig.nvim" },
     { "RRethy/vim-illuminate" },
     { "nvimtools/none-ls.nvim", dependencies = { "nvim-lua/plenary.nvim" } },
-    -- { "jose-elias-alvarez/null-ls.nvim" },
     { "fatih/vim-go" },
 
     -- lsp ui 增强 

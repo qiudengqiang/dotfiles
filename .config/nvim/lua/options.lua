@@ -29,8 +29,8 @@ vim.opt.cursorcolumn = true                     -- highlight the current column
 vim.opt.number = true                           -- set numbered lines
 vim.opt.relativenumber = true                   -- set relative numbered lines
 vim.opt.numberwidth = 5                         -- set number column width to 2 {default 4}
-vim.opt.redrawtime=10000			-- big file syntax disable
-vim.opt.maxmempattern=2000000			-- max mem
+vim.opt.redrawtime=10000			            -- big file syntax disable
+vim.opt.maxmempattern=2000000			        -- max mem
 
 vim.opt.signcolumn = "yes"                      -- always show the sign column otherwise it would shift the text each time
 vim.opt.wrap = true                             -- display lines as one long line

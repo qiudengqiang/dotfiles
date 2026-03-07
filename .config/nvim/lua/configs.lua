@@ -507,6 +507,31 @@ if luasnip_ok then
     -- end
 end
 
+-- zbirenbaum/copilot.lua - copilot
+local copilot_ok, copilot = pcall(require, "copilot")
+if copilot_ok then
+    copilot.setup({
+        panel = {
+            enabled = false,
+        },
+        suggestion = {
+            enabled = true,
+            auto_trigger = true,
+            keymap = {
+                accept = "<M-l>",
+                accept_word = "<M-w>",
+                accept_line = "<M-j>",
+                next = "<M-]>",
+                prev = "<M-[>",
+                dismiss = "<C-]>",
+            },
+        },
+        filetypes = {
+            help = false,
+        },
+    })
+end
+
 
 -- hrsh7th/nvim-cmp - cmp 
 local cmp_ok, cmp = pcall(require, "cmp")
@@ -1078,8 +1103,5 @@ if dap_ok then
             },
         },
     })
-    
-
-
 
 end
