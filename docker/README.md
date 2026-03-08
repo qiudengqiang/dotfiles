@@ -17,9 +17,14 @@
 ```bash
 cd ~/workspace/github/dotfile
 
-# 本地重建镜像（不依赖本地 assets 文件）
+# 本地重建镜像
 make build-image
-# 仅拉取远端镜像：make pull-image
+
+# 仅拉取远端镜像
+make pull-image
+
+# 推送镜像到dockerhub
+make push-image
 
 # 烟雾测试（输出 nvim/node/rg/fd/fzf/prettier/black/stylua/dlv 版本）
 make smoke
