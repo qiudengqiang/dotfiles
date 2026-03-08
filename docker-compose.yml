@@ -1,0 +1,13 @@
+services:
+  dev:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.centos-stream9
+    image: vinoqiu/terminal-env:stable
+    container_name: dotfile-dev
+    volumes:
+      - .:/opt/dotfile
+      - ${HOME}/workspace:/workspace
+    working_dir: /workspace
+    stdin_open: true
+    tty: true

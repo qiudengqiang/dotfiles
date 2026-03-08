@@ -1,0 +1,5 @@
+# Copy to ~/.bash_profile.local and keep your machine/company-only settings there.
+# This file is intentionally not linked by bootstrap and should not be committed with secrets.
+
+# Example internal ssh shortcuts
+# alias test-zjy='./login.exp dssh odin-system-test01.zjy'

@@ -5,13 +5,18 @@ local lspconfig_ensure_installed = {
     "lua_ls",
 }
 
+local mason_lsp_servers = {}
+for _, server in ipairs(lspconfig_ensure_installed) do
+    table.insert(mason_lsp_servers, vim.split(server, "@")[1])
+end
+
 -- The goal of nvim-bqf is to make Neovim's quickfix window better.
 local bqf_ok, bqf = pcall(require, "bqf")
 if bqf_ok then
     bqf.setup({})
 end
 
--- folke/trouble.nvim - trouble 
+-- folke/trouble.nvim - trouble
 local trouble_ok, trouble = pcall(require, "trouble")
 if trouble_ok then
     trouble.setup({
@@ -52,13 +57,13 @@ if blankline_ok then
     })
 end
 
--- folke/todo-comments.nvim - todo-comments 
+-- folke/todo-comments.nvim - todo-comments
 local todo_comments_ok, todo_comments = pcall(require, "todo-comments")
 if todo_comments_ok then
     todo_comments.setup()
 end
 
--- numToStr/Comment.nvim - comment 
+-- numToStr/Comment.nvim - comment
 local comment_ok, comment = pcall(require, "Comment")
 if comment_ok then
     comment.setup {
@@ -90,7 +95,7 @@ if comment_ok then
     }
 end
 
--- folke/flash.nvim - flash 
+-- folke/flash.nvim - flash
 local flash_ok, flash = pcall(require, "flash")
 if flash_ok then
     flash.setup({
@@ -234,73 +239,22 @@ local bufferline_ok, bufferline = pcall(require, "bufferline")
 if bufferline_ok then
     bufferline.setup({
         options = {
-            numbers = "none", -- | "ordinal" | "buffer_id" | "both" | function({ ordinal, id, lower, raise }): string,
-            -- close_command = "Bdelete! %d", -- can be a string | function, see "Mouse actions"
-            -- right_mouse_command = "Bdelete! %d", -- can be a string | function, see "Mouse actions"
-            -- left_mouse_command = "buffer %d", -- can be a string | function, see "Mouse actions"
-            -- middle_mouse_command = nil, -- can be a string | function, see "Mouse actions"
-            -- NOTE: this plugin is designed with this icon in mind,
-            -- and so changing this is NOT recommended, this is intended
-            -- as an escape hatch for people who cannot bear it for whatever reason
-            -- indicator_icon = nil,
+            numbers = "none",
             indicator = { style = "none" },
-            -- buffer_close_icon = "",
-            -- buffer_close_icon = "",
-            -- modified_icon = "●",
-            -- close_icon = "",
-            -- close_icon = "",
-            -- left_trunc_marker = "",
-            -- right_trunc_marker = "",
-            --- name_formatter can be used to change the buffer"s label in the bufferline.
-            --- Please note some names can/will break the
-            --- bufferline so use this at your discretion knowing that it has
-            --- some limitations that will *NOT* be fixed.
-            -- name_formatter = function(buf)  -- buf contains a "name", "path" and "bufnr"
-            --   -- remove extension from markdown files for example
-            --   if buf.name:match("%.md") then
-            --     return vim.fn.fnamemodify(buf.name, ":t:r")
-            --   end
-            -- end,
-            max_name_length = 30,
-            max_prefix_length = 30, -- prefix used when a buffer is de-duplicated
+            max_name_length = 30, -- prefix used when a buffer is de-duplicated
+            max_prefix_length = 30,
             tab_size = 0,
-            diagnostics = false, -- | "nvim_lsp" | "coc",
+            diagnostics = false,
             diagnostics_update_in_insert = false,
-            -- diagnostics_indicator = function(count, level, diagnostics_dict, context)
-            --   return "("..count..")"
-            -- end,
-            -- NOTE: this will be called a lot so don"t do any heavy processing here
-            -- custom_filter = function(buf_number)
-            --   -- filter out filetypes you don"t want to see
-            --   if vim.bo[buf_number].filetype ~= "<i-dont-want-to-see-this>" then
-            --     return true
-            --   end
-            --   -- filter out by buffer name
-            --   if vim.fn.bufname(buf_number) ~= "<buffer-name-I-dont-want>" then
-            --     return true
-            --   end
-            --   -- filter out based on arbitrary rules
-            --   -- e.g. filter out vim wiki buffer from tabline in your work repo
-            --   if vim.fn.getcwd() == "<work-repo>" and vim.bo[buf_number].filetype ~= "wiki" then
-            --     return true
-            --   end
-            -- end,
-            -- offsets = { { filetype = "NvimTree", text = "", padding = 1 } },
             show_buffer_icons = false,
             show_buffer_close_icons = false,
             show_close_icon = false,
             show_tab_indicators = false,
-            show_duplicate_prefix = false, -- whether to show duplicate buffer prefix
-            persist_buffer_sort = false, -- whether or not custom sorted buffers should persist
-            -- can also be a table containing 2 custom separators
-            -- [focused and unfocused]. eg: { "|", "|" }
-            separator_style = {}, -- | "thick" | "thin" | { "any", "any" },
+            show_duplicate_prefix = false,
+            persist_buffer_sort = false,
+            separator_style = {},
             enforce_regular_tabs = false,
             always_show_bufferline = true,
-            -- sort_by = "id" | "extension" | "relative_directory" | "directory" | "tabs" | function(buffer_a, buffer_b)
-            --   -- add custom logic
-            --   return buffer_a.modified > buffer_b.modified
-            -- end
         },
         highlights = {
             fill = {
@@ -337,8 +291,8 @@ if bufferline_ok then
                 bg = { attribute = "bg", highlight = "TabLine" },
             },
             close_button_selected = {
-                fg = {attribute="fg",highlight="TabLineSel"},
-                bg ={attribute="bg",highlight="TabLineSel"}
+                fg = { attribute = "fg", highlight = "TabLineSel" },
+                bg = { attribute = "bg", highlight = "TabLineSel" }
             },
             tab_selected = {
                 fg = { attribute = "fg", highlight = "Normal" },
@@ -384,27 +338,6 @@ end
 -- nvim-lualine/lualine.nvim
 local lualine_ok, lualine = pcall(require, "lualine")
 if lualine_ok then
-    -- local hide_in_width = function()
-    --     return vim.fn.winwidth(0) > 80
-    -- end
-
-    -- local diagnostics = {
-    --     "diagnostics",
-    --     sources = { "nvim_diagnostic" },
-    --     sections = { "error", "warn" },
-    --     symbols = { error = " ", warn = " " },
-    --     colored = false,
-    --     update_in_insert = false,
-    --     always_visible = true,
-    -- }
-
-    -- local diff = {
-    --     "diff",
-    --     colored = false,
-    --     symbols = { added = " ", modified = " ", removed = " " }, -- changes diff symbols
-    --     cond = hide_in_width
-    -- }
-
     local filetype = {
         "filetype",
         icons_enabled = false,
@@ -421,20 +354,8 @@ if lualine_ok then
         "location",
     }
 
-    -- cool function for progress
-    -- local progress = function()
-    --     local current_line = vim.fn.line(".")
-    --     local total_lines = vim.fn.line("$")
-    --     local chars = { "__", "▁▁", "▂▂", "▃▃", "▄▄", "▅▅", "▆▆", "▇▇", "██" }
-    --     local line_ratio = current_line / total_lines
-    --     local index = math.ceil(line_ratio * #chars)
-    --     return chars[index]
-    -- end
-
     local filename = {
         "filename",
-        -- file_status = false,
-        -- newfile_status = false,
         path = 3,
         shorting_target = 40,
     }
@@ -447,7 +368,7 @@ if lualine_ok then
     local mode = {
         "mode",
         fmt = function(str)
-            return str:sub(1,1)
+            return str:sub(1, 1)
         end,
     }
 
@@ -481,7 +402,7 @@ if lualine_ok then
     })
 end
 
--- nvimdev/lspsaga.nvim - lspsaga 
+-- nvimdev/lspsaga.nvim - lspsaga
 local lspsaga_ok, lspsaga = pcall(require, "lspsaga")
 if lspsaga_ok then
     lspsaga.setup({
@@ -496,7 +417,7 @@ if lspsaga_ok then
     })
 end
 
--- L3MON4D3/LuaSnip - luasnip 
+-- L3MON4D3/LuaSnip - luasnip
 local luasnip_ok, luasnip = pcall(require, "luasnip")
 if luasnip_ok then
     require("luasnip/loaders/from_vscode").lazy_load()
@@ -510,7 +431,9 @@ end
 -- zbirenbaum/copilot.lua - copilot
 local copilot_ok, copilot = pcall(require, "copilot")
 if copilot_ok then
+    local copilot_node = (vim.fn.executable("/opt/homebrew/bin/node") == 1) and "/opt/homebrew/bin/node" or "node"
     copilot.setup({
+        copilot_node_command = copilot_node,
         panel = {
             enabled = false,
         },
@@ -518,11 +441,11 @@ if copilot_ok then
             enabled = true,
             auto_trigger = true,
             keymap = {
-                accept = "<M-l>",
-                accept_word = "<M-w>",
-                accept_line = "<M-j>",
-                next = "<M-]>",
-                prev = "<M-[>",
+                accept = "<C-y>",
+                accept_word = false,
+                accept_line = false,
+                next = "<C-j>",
+                prev = "<C-k>",
                 dismiss = "<C-]>",
             },
         },
@@ -533,7 +456,7 @@ if copilot_ok then
 end
 
 
--- hrsh7th/nvim-cmp - cmp 
+-- hrsh7th/nvim-cmp - cmp
 local cmp_ok, cmp = pcall(require, "cmp")
 if cmp_ok then
     -- find more here: https://www.nerdfonts.com/cheat-sheet
@@ -584,7 +507,7 @@ if cmp_ok then
             ["<c-e>"] = cmp.mapping.abort(),
             -- Set `select` to `false` to only confirm explicitly selected items.
             -- Accept currently selected item. If none selected, `select` first item.
-            ["<CR>"] = cmp.mapping.confirm ({ select = true }),
+            ["<CR>"] = cmp.mapping.confirm({ select = true }),
         },
         formatting = {
             fields = { "kind", "abbr", "menu" },
@@ -624,8 +547,7 @@ if cmp_ok then
 end
 
 
-
--- hrsh7th/cmp-nvim-lsp -- cmp-nvim-lsp 
+-- hrsh7th/cmp-nvim-lsp -- cmp-nvim-lsp
 local cmp_nvim_lsp_ok, cmp_nvim_lsp = pcall(require, "cmp_nvim_lsp")
 if cmp_nvim_lsp_ok then
     cmp_nvim_lsp.setup({
@@ -634,9 +556,24 @@ if cmp_nvim_lsp_ok then
 end
 
 
--- neovim/nvim-lspconfig -- lspconfig 
-local lspconfig_ok, lspconfig = pcall(require, "lspconfig")
-if lspconfig_ok then
+-- neovim/nvim-lspconfig -- lspconfig
+local has_new_lsp_api = (vim.lsp ~= nil and vim.lsp.config ~= nil and type(vim.lsp.enable) == "function")
+local lspconfig_ok, lspconfig = false, nil
+if not has_new_lsp_api then
+    lspconfig_ok, lspconfig = pcall(require, "lspconfig")
+end
+
+if has_new_lsp_api or lspconfig_ok then
+    -- Compatibility shim for plugins still calling deprecated API on nvim 0.11+.
+    if has_new_lsp_api and vim.lsp.buf_get_clients then
+        vim.lsp.buf_get_clients = function(opts)
+            if type(opts) == "number" then
+                opts = { bufnr = opts }
+            end
+            return vim.lsp.get_clients(opts or {})
+        end
+    end
+
     local capabilities = vim.lsp.protocol.make_client_capabilities()
     capabilities.textDocument.completion.completionItem.snippetSupport = true
     if cmp_nvim_lsp_ok then
@@ -659,6 +596,18 @@ if lspconfig_ok then
         vim.keymap.set("n", "K", vim.lsp.buf.hover, opts("Hover Documentation"))
     end
 
+    -- Global fallback mappings so keys are always available.
+    do
+        local function gopts(desc)
+            return { desc = "lsp: " .. desc, noremap = true, silent = true, nowait = true }
+        end
+        vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, gopts("Rename"))
+        vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, gopts("Code Action"))
+        vim.keymap.set("n", "gd", vim.lsp.buf.definition, gopts("Go to Definition"))
+        vim.keymap.set("n", "gi", vim.lsp.buf.implementation, gopts("Go to Implementation"))
+        vim.keymap.set("n", "gr", vim.lsp.buf.references, gopts("References"))
+        vim.keymap.set("n", "K", vim.lsp.buf.hover, gopts("Hover Documentation"))
+    end
 
 
     local on_attach = function(client, bufnr)
@@ -686,16 +635,22 @@ if lspconfig_ok then
 
     for _, server in pairs(lspconfig_ensure_installed) do
         server = vim.split(server, "@")[1]
+        local server_opts = vim.deepcopy(opts)
 
         local require_ok, conf_opts = pcall(require, "langs." .. server)
         if require_ok then
-            opts = vim.tbl_deep_extend("force", conf_opts, opts)
+            server_opts = vim.tbl_deep_extend("force", server_opts, conf_opts)
         end
 
-        lspconfig[server].setup(opts)
+        if has_new_lsp_api then
+            vim.lsp.config(server, server_opts)
+            vim.lsp.enable(server)
+        elseif lspconfig and lspconfig[server] then
+            lspconfig[server].setup(server_opts)
+        end
     end
 
-    -- handlers.setup (modernized) 
+    -- handlers.setup (modernized)
     vim.diagnostic.config({
         virtual_text = false,  -- 不显示内联错误
         signs = {
@@ -730,7 +685,7 @@ if lspconfig_ok then
 
 end
 
--- nvim-treesitter/nvim-treesitter - nvim_treesitter_configs 
+-- nvim-treesitter/nvim-treesitter - nvim_treesitter_configs
 local treesitter_configs_ok, treesitter_configs = pcall(require, "nvim-treesitter.configs")
 if treesitter_configs_ok then
     treesitter_configs.setup({
@@ -748,11 +703,11 @@ if treesitter_configs_ok then
 end
 
 -- telescope
--- nvim-telescope/telescope.nvim - telescope 
+-- nvim-telescope/telescope.nvim - telescope
 local telescope_ok, telescope = pcall(require, "telescope")
 if telescope_ok then
     local actions = require "telescope.actions"
-    telescope.setup ({
+    telescope.setup({
         defaults = {
             prompt_prefix = " ",
             selection_caret = " ",
@@ -824,25 +779,13 @@ if telescope_ok then
             },
         },
         pickers = {
-            -- Default configuration for builtin pickers goes here:
-            -- picker_name = {
-            --   picker_config_key = value,
-            --   ...
-            -- }
-            -- Now the picker_config_key will be applied every time you call this
-            -- builtin picker
         },
         extensions = {
-            -- Your extension configuration goes here:
-            -- extension_name = {
-            --   extension_config_key = value,
-            -- }
-            -- please take a look at the readme of the extension you want to configure
         },
     })
 end
 
--- windwp/nvim-autopairs - nvim-autopairs 
+-- windwp/nvim-autopairs - nvim-autopairs
 local autopairs_ok, autopairs = pcall(require, "nvim-autopairs")
 if autopairs_ok then
     autopairs.setup {
@@ -873,50 +816,20 @@ if autopairs_ok then
     end
 end
 
--- ahmedkhalf/project.nvim - project_nvim 
+-- ahmedkhalf/project.nvim - project_nvim
 local project_nvim_ok, project_nvim = pcall(require, "project_nvim")
 if project_nvim_ok then
     project_nvim.setup({
-        ---@usage set to false to disable project.nvim.
-        --- This is on by default since it"s currently the expected behavior.
         active = true,
-
         on_config_done = nil,
-
-        ---@usage set to true to disable setting the current-woriking directory
-        --- Manual mode doesn"t automatically change your root directory, so you have
-        --- the option to manually do so using `:ProjectRoot` command.
         manual_mode = false,
-
-        ---@usage Methods of detecting the root directory
-        --- Allowed values: **"lsp"** uses the native neovim lsp
-        --- **"pattern"** uses vim-rooter like glob pattern matching. Here
-        --- order matters: if one is not detected, the other is used as fallback. You
-        --- can also delete or rearangne the detection methods.
-        -- detection_methods = { "lsp", "pattern" }, -- NOTE: lsp detection will get annoying with multiple langs in one project
         detection_methods = { "pattern", "lsp" },
-
-
-        ---@usage patterns used to detect root dir, when **"pattern"** is in detection_methods
         patterns = { ".git", "package.json", "Makefile" },
-
-        ---@ Show hidden files in telescope when searching for files in a project
         show_hidden = false,
-
-        ---@usage When set to false, you will get a message when project.nvim changes your directory.
-        -- When set to false, you will get a message when project.nvim changes your directory.
         silent_chdir = true,
-
-        -- global, tab, win
         scope_chdir = "win",
-
-        ---@usage list of lsp client names to ignore when using **lsp** detection. eg: { "efm", ... }
         ignore_lsp = { "none-ls" },
-
         exclude_dirs = { "~/.cargo/*" },
-
-        ---@type string
-        ---@usage path to store the project history for use in telescope
         datapath = vim.fn.stdpath("data"),
     })
 
@@ -926,7 +839,7 @@ if project_nvim_ok then
 
 end
 
--- jose-elias-alvarez/null-ls.nvim -- null-ls 
+-- jose-elias-alvarez/null-ls.nvim -- null-ls
 local null_ls_ok, null_ls = pcall(require, "none-ls")
 if null_ls_ok then
 
@@ -935,21 +848,27 @@ if null_ls_ok then
     -- https://github.com/jose-elias-alvarez/null-ls.nvim/tree/main/lua/null-ls/builtins/diagnostics
     -- local diagnostics = null_ls.builtins.diagnostics
 
+    local sources = {}
+    if vim.fn.executable("prettier") == 1 then
+        table.insert(sources, formatting.prettier.with({ extra_args = { "--no-semi", "--single-quote", "--jsx-single-quote" } }))
+    end
+    if vim.fn.executable("black") == 1 then
+        table.insert(sources, formatting.black.with({ extra_args = { "--fast" } }))
+    end
+    if vim.fn.executable("stylua") == 1 then
+        table.insert(sources, formatting.stylua)
+    end
+
     null_ls.setup({
         debug = false,
-        sources = {
-            formatting.prettier.with({ extra_args = { "--no-semi", "--single-quote", "--jsx-single-quote" } }),
-            formatting.black.with({ extra_args = { "--fast" } }),
-            formatting.stylua,
-            -- diagnostics.flake8
-        },
+        sources = sources,
     })
 end
 
 -- folke/which-key.nvim -- which-key
 local which_key_ok, which_key = pcall(require, "which-key")
 if which_key_ok then
-    which_key.setup ({
+    which_key.setup({
         delay = 300,  -- 延迟显示
         plugins = {
             marks = true, -- shows a list of your marks on " in NORMAL or ' in VISUAL mode
@@ -972,7 +891,7 @@ if which_key_ok then
     })
 end
 
---  williamboman/mason.nvim -- mason 
+--  williamboman/mason.nvim -- mason
 local mason_ok, mason = pcall(require, "mason")
 if mason_ok then
     mason.setup({
@@ -987,11 +906,31 @@ if mason_ok then
             max_concurrent_installers = 4,
         },
     })
+
+    local mason_lspconfig_ok, mason_lspconfig = pcall(require, "mason-lspconfig")
+    if mason_lspconfig_ok then
+        mason_lspconfig.setup({
+            ensure_installed = mason_lsp_servers,
+            automatic_installation = true,
+        })
+    end
+
+    -- Best-effort install for non-LSP tools used by null-ls and dap.
+    local mason_registry_ok, mason_registry = pcall(require, "mason-registry")
+    if mason_registry_ok then
+        local extra_tools = { "prettier", "black", "stylua", "delve" }
+        for _, pkg_name in ipairs(extra_tools) do
+            local ok, pkg = pcall(mason_registry.get_package, pkg_name)
+            if ok and pkg and not pkg:is_installed() then
+                pkg:install()
+            end
+        end
+    end
 end
 
 
 -- debug, test
--- mfussenegger/nvim-dap -- dap 
+-- mfussenegger/nvim-dap -- dap
 local dap_ok, dap = pcall(require, "dap")
 if dap_ok then
     -- dap {{{
@@ -1050,7 +989,6 @@ if dap_ok then
             },
         },
     })
-
 
 
     -- https://github.com/theHamsta/nvim-dap-virtual-text

@@ -1,0 +1,105 @@
+FROM quay.io/centos/centos:stream9
+
+ENV DOTFILES_DIR=/opt/dotfile
+ENV PATH="/root/.local/bin:/root/go/bin:/root/.cargo/bin:${PATH}"
+
+# Use mainland mirrors for faster dependency installation.
+RUN find /etc/yum.repos.d -name '*.repo' -type f -exec sed -i 's/^enabled=1/enabled=0/g' {} \; \
+  && cat > /etc/yum.repos.d/aliyun-centos-stream.repo <<'EOF'
+[aliyun-baseos]
+name=CentOS Stream 9 - BaseOS
+baseurl=https://mirrors.aliyun.com/centos-stream/9-stream/BaseOS/$basearch/os/
+enabled=1
+gpgcheck=0
+
+[aliyun-appstream]
+name=CentOS Stream 9 - AppStream
+baseurl=https://mirrors.aliyun.com/centos-stream/9-stream/AppStream/$basearch/os/
+enabled=1
+gpgcheck=0
+
+[aliyun-crb]
+name=CentOS Stream 9 - CRB
+baseurl=https://mirrors.aliyun.com/centos-stream/9-stream/CRB/$basearch/os/
+enabled=1
+gpgcheck=0
+
+[aliyun-extras-common]
+name=CentOS Stream 9 - Extras Common
+baseurl=https://mirrors.aliyun.com/centos-stream/SIGs/9-stream/extras/$basearch/extras-common/
+enabled=1
+gpgcheck=0
+EOF
+
+RUN dnf -y makecache \
+  && dnf -y update \
+  && dnf -y install epel-release \
+  && rm -f /etc/yum.repos.d/epel*.repo
+
+RUN cat > /etc/yum.repos.d/aliyun-epel.repo <<'EOF'
+[epel]
+name=Extra Packages for Enterprise Linux 9 - $basearch
+baseurl=https://mirrors.aliyun.com/epel/9/Everything/$basearch/
+enabled=1
+gpgcheck=0
+EOF
+
+RUN dnf -y makecache \
+  && dnf -y install \
+    ca-certificates git zsh sudo findutils unzip tar gzip xz which \
+    gcc gcc-c++ make \
+    python3 python3-pip \
+    golang \
+    rust cargo \
+    ripgrep fd-find fzf \
+  && dnf clean all \
+  && rm -rf /var/cache/dnf
+
+RUN arch="$(uname -m)" \
+  && case "$arch" in \
+    x86_64) nvim_arch="x86_64" ;; \
+    aarch64) nvim_arch="arm64" ;; \
+    *) echo "unsupported arch: $arch" && exit 1 ;; \
+  esac \
+  && nvim_url="https://github.com/neovim/neovim/releases/download/stable/nvim-linux-${nvim_arch}.tar.gz" \
+  && nvim_file="/tmp/nvim-linux-${nvim_arch}.tar.gz" \
+  && (curl -fL --connect-timeout 8 --max-time 180 --retry 3 --retry-all-errors "$nvim_url" -o "$nvim_file" \
+      || curl -fL --connect-timeout 8 --max-time 180 --retry 3 --retry-all-errors "https://ghproxy.cn/${nvim_url}" -o "$nvim_file" \
+      || curl -fL --connect-timeout 8 --max-time 180 --retry 3 --retry-all-errors "https://ghproxy.cfd/${nvim_url}" -o "$nvim_file") \
+  && tar -C /opt -xzf "$nvim_file" \
+  && ln -sf "/opt/nvim-linux-${nvim_arch}/bin/nvim" /usr/local/bin/nvim \
+  && rm -f "$nvim_file"
+
+RUN curl -fsSL https://rpm.nodesource.com/setup_22.x | bash - \
+  && dnf -y install nodejs \
+  && dnf clean all \
+  && rm -rf /var/cache/dnf
+
+RUN if command -v fdfind >/dev/null 2>&1 && ! command -v fd >/dev/null 2>&1; then ln -s "$(command -v fdfind)" /usr/local/bin/fd; fi
+
+RUN npm config set registry https://registry.npmmirror.com \
+  && npm install -g prettier \
+  && python3 -m pip install --user --upgrade pip -i https://mirrors.aliyun.com/pypi/simple/ \
+  && python3 -m pip install --user black -i https://mirrors.aliyun.com/pypi/simple/ \
+  && arch="$(uname -m)" \
+  && case "$arch" in \
+    x86_64) stylua_arch="x86_64" ;; \
+    aarch64) stylua_arch="aarch64" ;; \
+    *) echo "unsupported arch: $arch" && exit 1 ;; \
+  esac \
+  && stylua_url="https://github.com/JohnnyMorganz/StyLua/releases/latest/download/stylua-linux-${stylua_arch}.zip" \
+  && stylua_file="/tmp/stylua-linux-${stylua_arch}.zip" \
+  && (curl -fL --connect-timeout 8 --max-time 180 --retry 3 --retry-all-errors "$stylua_url" -o "$stylua_file" \
+      || curl -fL --connect-timeout 8 --max-time 180 --retry 3 --retry-all-errors "https://ghproxy.cn/${stylua_url}" -o "$stylua_file" \
+      || curl -fL --connect-timeout 8 --max-time 180 --retry 3 --retry-all-errors "https://ghproxy.cfd/${stylua_url}" -o "$stylua_file") \
+  && unzip -q "$stylua_file" -d /tmp/stylua \
+  && install -m 0755 /tmp/stylua/stylua /usr/local/bin/stylua \
+  && GO111MODULE=on GONOSUMDB='*' GOPROXY=https://goproxy.cn,direct go install github.com/go-delve/delve/cmd/dlv@latest \
+  && rm -rf /tmp/stylua "$stylua_file"
+
+WORKDIR /workspace
+COPY . /opt/dotfile
+COPY docker/entrypoint.sh /usr/local/bin/dotfile-entrypoint
+
+ENTRYPOINT ["dotfile-entrypoint"]
+CMD ["zsh", "-l"]

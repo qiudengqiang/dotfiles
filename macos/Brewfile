@@ -1,0 +1,14 @@
+# 基础工具
+brew "git"
+brew "neovim"
+brew "ripgrep"
+brew "fd"
+brew "fzf"
+brew "node"
+brew "lazygit"
+brew "prettier"
+brew "stylua"
+brew "delve"
+
+# 终端（可选）
+cask "iterm2"

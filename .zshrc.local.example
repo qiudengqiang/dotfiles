@@ -1,0 +1,15 @@
+# Copy to ~/.zshrc.local for machine-specific zsh settings.
+# This file is ignored by git.
+
+# Example: PATH/alias
+# export PATH="$HOME/.cargo/bin:$PATH"
+# alias gs='git status -sb'
+
+# HSTR integration (only when installed)
+if command -v hstr >/dev/null 2>&1; then
+  alias hh='hstr'
+  export HSTR_CONFIG='hicolor'
+  export HSTR_TIOCSTI='y'
+  bindkey -s '^R' 'hstr --\n'
+  bindkey -s '^Xk' 'hstr -k\n'
+fi

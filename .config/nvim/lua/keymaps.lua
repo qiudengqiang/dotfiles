@@ -5,13 +5,11 @@ end
 -- Shorten function name
 local keymap = vim.keymap.set
 
---Remap space as leader key
---keymap("", ",", "<Nop>", opts("leader"))
+-- Remap space as leader key
 vim.g.mapleader = " "      -- set leader to space
 vim.g.maplocalleader = " " -- set local leader to space
 
-
--- Custome --
+-- Custom
 function _G.ReloadConfig()
     require("plenary.reload").reload_module("user")
     dofile(vim.env.MYVIMRC)
@@ -26,7 +24,6 @@ keymap("n", "<c-j>", "7<c-e>", opts("scroll down"))
 keymap("n", "<c-k>", "7<c-y>", opts("scroll up"))
 keymap("n", "<c-e>", "<cmd>m+1<cr>", opts("move down"))
 keymap("n", "<c-y>", "<cmd>m-2<cr>", opts("move up"))
-
 
 -- telescope
 keymap("n", "<leader><Space>", "<cmd>NvimTreeFindFileToggle<cr>", opts("nvim tree"))
@@ -75,9 +72,10 @@ keymap("v", "p", '"_dP', opts("paste over"))
 keymap("x", "<c-p>", "<cmd>move '<-2<cr>gv-gv", opts("move up"))
 keymap("x", "<c-n>", "<cmd>move '>+1<cr>gv-gv", opts("move down"))
 
-
 -- flash
-keymap({ "n", "x", "o" }, "<leader>s", function() require("flash").jump({ search = { mode = "search" } }) end,
+keymap({ "n", "x", "o" }, "<leader>s", function()
+    require("flash").jump({ search = { mode = "search" } })
+end,
     opts("flash jump"))
 keymap({ "n", "x", "o" }, "<leader>S", function() require("flash").treesitter() end, opts("Flash Treesitter"))
 
@@ -94,11 +92,11 @@ keymap("n", "<leader>gh", ":DiffviewFileHistory %<CR>", opts("Git file history")
 keymap("n", "<leader>gH", ":DiffviewFileHistory<CR>", opts("Git branch history"))
 keymap("n", "<leader>gv", function()
     -- 检查 Diffview 是否已经打开
-    local view = require('diffview.lib').get_current_view()
+    local view = require("diffview.lib").get_current_view()
     if view then
-        vim.cmd('DiffviewClose')
+        vim.cmd("DiffviewClose")
     else
-        vim.cmd('DiffviewOpen')
+        vim.cmd("DiffviewOpen")
     end
 end, opts("Toggle Diffview"))
 

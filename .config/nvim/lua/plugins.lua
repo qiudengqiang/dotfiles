@@ -21,22 +21,25 @@ require("lazy").setup({
     { "windwp/nvim-autopairs" },
     { "akinsho/bufferline.nvim" },
     { "nvim-lualine/lualine.nvim" },
-    { "nvim-treesitter/nvim-treesitter", branch = 'master', lazy = false, build = ":TSUpdate" },
+    { "nvim-treesitter/nvim-treesitter", branch = "master", lazy = false, build = ":TSUpdate" },
 
     -- git
-    { 'tpope/vim-fugitive'},
-    { 'lewis6991/gitsigns.nvim', require = {'gitsigns'} },
-    { 'sindrets/diffview.nvim', requires = 'nvim-lua/plenary.nvim' },
+    { "tpope/vim-fugitive" },
+    { "lewis6991/gitsigns.nvim" },
+    { "sindrets/diffview.nvim", dependencies = { "nvim-lua/plenary.nvim" } },
 
     -- ui
     { "rebelot/kanagawa.nvim" },
-    { "nvim-telescope/telescope.nvim", dependencies = {"nvim-lua/plenary.nvim", "nvim-telescope/telescope-ui-select.nvim"} },
+    {
+        "nvim-telescope/telescope.nvim",
+        dependencies = { "nvim-lua/plenary.nvim", "nvim-telescope/telescope-ui-select.nvim" },
+    },
     { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
-    { "nvim-tree/nvim-tree.lua", dependencies = {"nvim-tree/nvim-web-devicons"} },
-    { "ahmedkhalf/project.nvim", requires = {"nvim-telescope/telescope.nvim"} },
-    { "lukas-reineke/indent-blankline.nvim",},
+    { "nvim-tree/nvim-tree.lua", dependencies = { "nvim-tree/nvim-web-devicons" } },
+    { "ahmedkhalf/project.nvim", dependencies = { "nvim-telescope/telescope.nvim" } },
+    { "lukas-reineke/indent-blankline.nvim" },
 
-    -- Cmp 
+    -- Cmp
     { "hrsh7th/nvim-cmp" },
     { "hrsh7th/cmp-buffer" },
     { "hrsh7th/cmp-path" },
@@ -55,25 +58,32 @@ require("lazy").setup({
     { "nvimtools/none-ls.nvim", dependencies = { "nvim-lua/plenary.nvim" } },
     { "fatih/vim-go" },
 
-    -- lsp ui 增强 
+    -- lsp ui 增强
     { "nvimdev/lspsaga.nvim" },
     { "folke/trouble.nvim", dependencies = "kyazdani42/nvim-web-devicons" },
 
     -- test
-    { "nvim-neotest/neotest",
-        dependencies = { "nvim-lua/plenary.nvim", "nvim-treesitter/nvim-treesitter", "antoinemadec/FixCursorHold.nvim", "nvim-neotest/neotest-go", "nvim-neotest/nvim-nio" },
+    {
+        "nvim-neotest/neotest",
+        dependencies = {
+            "nvim-lua/plenary.nvim",
+            "nvim-treesitter/nvim-treesitter",
+            "antoinemadec/FixCursorHold.nvim",
+            "nvim-neotest/neotest-go",
+            "nvim-neotest/nvim-nio",
+        },
     },
 
     -- quickfix
     { "kevinhwang91/nvim-bqf", ft = "qf" },
 
-    --find/search
+    -- find/search
     { "folke/flash.nvim", event = "BufEnter" },
-    { "folke/which-key.nvim", requires = { "echasnovski/mini.nvim" }, event = "BufEnter" },
-    { "folke/todo-comments.nvim", requires = "nvim-lua/plenary.nvim" },
+    { "folke/which-key.nvim", dependencies = { "echasnovski/mini.nvim" }, event = "BufEnter" },
+    { "folke/todo-comments.nvim", dependencies = { "nvim-lua/plenary.nvim" } },
 
-    -- {{{ debug, test
-    { "mfussenegger/nvim-dap"},
+    -- debug, test
+    { "mfussenegger/nvim-dap" },
     { "rcarriga/nvim-dap-ui" },
     { "leoluz/nvim-dap-go" },
     { "theHamsta/nvim-dap-virtual-text" },
