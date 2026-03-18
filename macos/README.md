@@ -5,6 +5,7 @@
 - `~/.bash_profile`
 - `~/.bashrc`
 - `~/.zshrc`
+- `~/.wezterm.lua`
 - `~/.config/nvim`
 - 常用工具（Homebrew + Brewfile）
 
@@ -38,6 +39,7 @@ make macos-dry-run
    - `~/.bash_profile -> <repo>/.bash_profile`
    - `~/.bashrc -> <repo>/.bashrc`
    - `~/.zshrc -> <repo>/.zshrc`
+   - `~/.wezterm.lua -> <repo>/.wezterm.lua`
    - `~/.config/nvim -> <repo>/.config/nvim`
 
 ## 3. 恢复后自检
@@ -53,10 +55,11 @@ nvim
 - Copilot 首次登录：`:Copilot auth signin`
 - 查看状态：`:Copilot status`
 
-## 4. Terminal / iTerm2 Meta 键设置
+## 4. Terminal / iTerm2 / WezTerm Meta 键设置
 为了让 Neovim 识别 `Alt/Option` 组合键：
 - Terminal.app: 设置 -> 配置描述文件 -> 键盘 -> 勾选 `Use Option as Meta key`
 - iTerm2: Profiles -> Keys -> Left/Right Option Key -> `Esc+`
+- WezTerm: 通过 `~/.wezterm.lua` 配置（本仓库已托管）
 
 ## 5. 回滚
 如果需要回滚：

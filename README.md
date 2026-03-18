@@ -53,5 +53,5 @@ dotfile/
 ├── macos/                    # macOS 脚本与文档
 ├── docker/                   # Docker 相关脚本与文档
 ├── docker-compose.yml
-└── .bash_profile/.bashrc/.zshrc/.config
+└── .bash_profile/.bashrc/.zshrc/.wezterm.lua/.config
 ```

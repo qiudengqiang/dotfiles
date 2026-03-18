@@ -14,6 +14,14 @@ need_cmd() {
   command -v "$1" >/dev/null 2>&1
 }
 
+ensure_macos() {
+  if [[ "$(uname -s)" != "Darwin" ]]; then
+    warn "This script is macOS-only. Current OS: $(uname -s)"
+    warn "For Linux/container workflow, use docker commands in README.md / docker/README.md"
+    exit 1
+  fi
+}
+
 parse_args() {
   case "${1:-}" in
     "")
@@ -39,7 +47,7 @@ print_plan() {
   info "[dry-run] 3) Install Brewfile packages"
   info "[dry-run] 4) Ensure external tools: prettier/black/stylua/dlv"
   info "[dry-run] 5) Ensure Oh My Zsh + plugins"
-  for target in ".bash_profile" ".bashrc" ".zshrc" ".config/nvim"; do
+  for target in ".bash_profile" ".bashrc" ".zshrc" ".wezterm.lua" ".config/nvim"; do
     local src="$REPO_DIR/$target"
     local dst="$HOME/$target"
     if [[ -L "$dst" && "$(readlink "$dst")" == "$src" ]]; then
@@ -231,6 +239,7 @@ link_item() {
 
 main() {
   parse_args "${1:-}"
+  ensure_macos
   if [[ "$MODE" == "dry-run" ]]; then
     print_plan
     return 0
@@ -247,6 +256,7 @@ main() {
   link_item ".bash_profile"
   link_item ".bashrc"
   link_item ".zshrc"
+  link_item ".wezterm.lua"
   link_item ".config/nvim"
 
   info "Done"

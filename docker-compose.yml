@@ -7,7 +7,7 @@ services:
     container_name: dotfile-dev
     volumes:
       - .:/opt/dotfile
-      - ${HOME}/workspace:/workspace
-    working_dir: /workspace
+      - ${HOME}:/work
+    working_dir: /work
     stdin_open: true
     tty: true
