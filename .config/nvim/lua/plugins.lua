@@ -12,6 +12,7 @@ if not vim.loop.fs_stat(lazypath) then
 end
 
 vim.opt.rtp:prepend(lazypath)
+local is_macos = vim.fn.has("macunix") == 1
 
 require("lazy").setup({
     { "numToStr/Comment.nvim" },
@@ -48,7 +49,7 @@ require("lazy").setup({
     { "L3MON4D3/LuaSnip" },
     { "hrsh7th/cmp-nvim-lsp" },
     { "hrsh7th/cmp-nvim-lua" },
-    { "zbirenbaum/copilot.lua" },
+    { "zbirenbaum/copilot.lua", enabled = is_macos },
 
     -- LSP
     { "neovim/nvim-lspconfig" }, -- enable LSP

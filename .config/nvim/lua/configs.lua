@@ -431,7 +431,8 @@ end
 -- zbirenbaum/copilot.lua - copilot
 -- If lazy failed to install this plugin (e.g. weak network), do not trigger lazy loader errors.
 local copilot_plugin_path = vim.fn.stdpath("data") .. "/lazy/copilot.lua"
-if vim.loop.fs_stat(copilot_plugin_path) then
+local is_macos = vim.fn.has("macunix") == 1
+if is_macos and vim.loop.fs_stat(copilot_plugin_path) then
     local copilot_ok, copilot = pcall(require, "copilot")
     if copilot_ok then
         local copilot_node = (vim.fn.executable("/opt/homebrew/bin/node") == 1) and "/opt/homebrew/bin/node" or "node"
