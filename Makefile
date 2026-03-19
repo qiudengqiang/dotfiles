@@ -6,6 +6,7 @@ PUSH_PLATFORMS ?= linux/amd64,linux/arm64
 IMAGE ?= vinoqiu/terminal-env:stable
 EXPORT_TAR_AMD64 ?= terminal-env-stable-linux-amd64.tar
 CONTAINER_NAME ?= terminal-env
+DOCKER_COMPOSE ?= $(shell if docker compose version >/dev/null 2>&1; then echo "docker compose"; elif command -v docker-compose >/dev/null 2>&1; then echo "docker-compose"; else echo "docker compose"; fi)
 
 macos-bootstrap:
 	./macos/bootstrap.sh
@@ -17,7 +18,7 @@ macos-doctor:
 	./macos/doctor.sh
 
 up:
-	CONTAINER_NAME=$(CONTAINER_NAME) docker compose up -d dev
+	CONTAINER_NAME=$(CONTAINER_NAME) $(DOCKER_COMPOSE) up -d dev
 
 shell:
 	@set -e; \
@@ -29,10 +30,10 @@ shell:
 	fi
 
 bootstrap:
-	docker compose run --rm dev bootstrap
+	$(DOCKER_COMPOSE) run --rm dev bootstrap
 
 smoke:
-	docker compose run --rm dev bash -lc 'set -euo pipefail; nvim --version | head -n1; node --version; rg --version | head -n1; fd --version; fzf --version; prettier --version; black --version; stylua --version; dlv version | head -n1'
+	$(DOCKER_COMPOSE) run --rm dev bash -lc 'set -euo pipefail; nvim --version | head -n1; node --version; rg --version | head -n1; fd --version; fzf --version; prettier --version; black --version; stylua --version; dlv version | head -n1'
 
 build-image-amd64:
 	docker buildx build \
@@ -74,11 +75,11 @@ push-image:
 		--push .
 
 ps:
-	docker compose ps -a
+	$(DOCKER_COMPOSE) ps -a
 
 logs:
-	docker compose logs --tail=200 dev || true
+	$(DOCKER_COMPOSE) logs --tail=200 dev || true
 
 clean:
-	CONTAINER_NAME=$(CONTAINER_NAME) docker compose down --remove-orphans
+	CONTAINER_NAME=$(CONTAINER_NAME) $(DOCKER_COMPOSE) down --remove-orphans
 	-docker rm -f $(CONTAINER_NAME) >/dev/null 2>&1
