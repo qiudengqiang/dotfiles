@@ -15,6 +15,10 @@ plugins=(
 # zstyle ':omz:update' mode reminder
 
 [[ -f "$ZSH/oh-my-zsh.sh" ]] && source "$ZSH/oh-my-zsh.sh"
+if [[ ! -f "$ZSH/oh-my-zsh.sh" ]]; then
+  # Fallback prompt when oh-my-zsh is unavailable (common in minimal Linux containers).
+  PROMPT='%n@%m:%~%# '
+fi
 
 # Zsh behavior
 setopt HIST_IGNORE_ALL_DUPS

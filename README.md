@@ -24,7 +24,8 @@ make build-image-arm64   # 构建本地 arm64 镜像（用于 ARM 机器）
 # make push-image
 make smoke
 make up            # 启动容器 terminal-env
-make shell         # 进入已启动容器
+make up-host       # Linux: 使用宿主机网络启动（会重建同名容器）
+make shell         # 进入已启动容器（bash）
 
 # 用完清理容器资源
 make clean
@@ -48,6 +49,7 @@ make pull-image
 make push-image
 make smoke
 make up
+make up-host
 make shell
 make bootstrap
 make ps
@@ -66,5 +68,5 @@ dotfile/
 ├── macos/                    # macOS 脚本与文档
 ├── docker/                   # Docker 相关脚本与文档
 ├── docker-compose.yml
-└── .bash_profile/.bashrc/.zshrc/.wezterm.lua/.config
+└── .bash_profile/.bashrc/.wezterm.lua/.config（可选 .zshrc）
 ```

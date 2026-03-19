@@ -43,6 +43,9 @@ make smoke
 # 启动容器（名称默认 terminal-env）
 make up
 
+# Linux 可选：使用宿主机网络启动（会重建同名容器）
+make up-host
+
 # 进入交互环境（仅进入已运行容器）
 make shell
 
@@ -76,7 +79,7 @@ docker run -it --rm \
   -v "$HOME":/work \
   -w /work \
   vinoqiu/terminal-env:stable \
-  zsh -l
+  bash -l
 ```
 
 ## 发布到 Docker Hub
@@ -101,10 +104,11 @@ docker manifest inspect vinoqiu/terminal-env:stable
 - 启动时会自动执行 dotfile 映射：
   - `~/.bash_profile -> /opt/dotfile/.bash_profile`
   - `~/.bashrc -> /opt/dotfile/.bashrc`
-  - `~/.zshrc -> /opt/dotfile/.zshrc`
   - `~/.config/nvim -> /opt/dotfile/.config/nvim`
-- 默认进入 `zsh -l`
-- `make up` 负责启动容器，`make shell` 只负责进入容器
+- 默认进入 `bash -l`
+- `make up` 负责通过 compose 启动容器（bridge 网络）
+- `make up-host`（Linux 专用）通过 `docker run --network host` 启动容器，会重建同名容器
+- `make shell` 只负责进入容器
 - 首次 `make up` 会自动预热 Neovim（Lazy 插件 + Mason 常用工具），首次耗时会更长
 - 宿主机目录映射：
   - 仓库映射到容器 `/opt/dotfile`

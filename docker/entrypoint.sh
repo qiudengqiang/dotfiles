@@ -40,7 +40,6 @@ link_item() {
 bootstrap_shell_only() {
   link_item ".bash_profile"
   link_item ".bashrc"
-  link_item ".zshrc"
   link_item ".config/nvim"
 }
 
@@ -83,10 +82,6 @@ main() {
 
   if [[ $# -gt 0 ]]; then
     exec "$@"
-  fi
-
-  if command -v zsh >/dev/null 2>&1; then
-    exec zsh -l
   fi
 
   exec bash -l

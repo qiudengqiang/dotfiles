@@ -1,4 +1,4 @@
-.PHONY: macos-bootstrap macos-bootstrap-dry-run macos-doctor up shell bootstrap smoke build-image-amd64 build-image-arm64 export-image-amd64 pull-image push-image ps logs clean
+.PHONY: macos-bootstrap macos-bootstrap-dry-run macos-doctor up up-host shell bootstrap smoke build-image-amd64 build-image-arm64 export-image-amd64 pull-image push-image ps logs clean
 
 BASE_IMAGE ?= debian:bookworm-slim
 GO_VERSION ?= 1.24.3
@@ -6,7 +6,7 @@ PUSH_PLATFORMS ?= linux/amd64,linux/arm64
 IMAGE ?= vinoqiu/terminal-env:stable
 EXPORT_TAR_AMD64 ?= terminal-env-stable-linux-amd64.tar
 CONTAINER_NAME ?= terminal-env
-DOCKER_COMPOSE ?= $(shell if docker compose version >/dev/null 2>&1; then echo "docker compose"; elif command -v docker-compose >/dev/null 2>&1; then echo "docker-compose"; else echo "docker compose"; fi)
+DOCKER_COMPOSE ?= $(shell if command -v docker-compose >/dev/null 2>&1; then echo "docker-compose"; elif docker compose version >/dev/null 2>&1; then echo "docker compose"; else echo "docker-compose"; fi)
 
 macos-bootstrap:
 	./macos/bootstrap.sh
@@ -20,12 +20,30 @@ macos-doctor:
 up:
 	CONTAINER_NAME=$(CONTAINER_NAME) $(DOCKER_COMPOSE) up -d dev
 
+up-host:
+	@set -e; \
+	if [ "$$(uname -s)" != "Linux" ]; then \
+	  echo "[ERROR] make up-host is Linux-only. use: make up"; \
+	  exit 1; \
+	fi; \
+	if docker ps -a --filter "name=^/$(CONTAINER_NAME)$$" --format '{{.Names}}' | grep -q '^$(CONTAINER_NAME)$$'; then \
+	  docker rm -f $(CONTAINER_NAME) >/dev/null 2>&1 || true; \
+	fi; \
+	docker run -dit \
+	  --name $(CONTAINER_NAME) \
+	  --network host \
+	  -v "$(CURDIR)":/opt/dotfile \
+	  -v "$$HOME":/work \
+	  -w /work \
+	  $(IMAGE) >/dev/null; \
+	echo "[OK] started $(CONTAINER_NAME) with host network"
+
 shell:
 	@set -e; \
 	if docker ps --filter "name=^/$(CONTAINER_NAME)$$" --format '{{.Names}}' | grep -q '^$(CONTAINER_NAME)$$'; then \
-	  docker exec -it $(CONTAINER_NAME) zsh -l; \
+	  docker exec -it $(CONTAINER_NAME) bash -l; \
 	else \
-	  echo "[ERROR] container $(CONTAINER_NAME) is not running. run: make up"; \
+	  echo "[ERROR] container $(CONTAINER_NAME) is not running. run: make up or make up-host"; \
 	  exit 1; \
 	fi
 

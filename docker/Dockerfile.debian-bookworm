@@ -9,7 +9,7 @@ ENV PATH="/usr/local/go/bin:/root/.local/bin:/root/go/bin:${PATH}"
 
 RUN apt-get -o Acquire::Retries=5 update \
   && apt-get install -y --no-install-recommends --fix-missing -o Acquire::Retries=5 \
-    ca-certificates curl git zsh sudo findutils unzip tar gzip xz-utils \
+    ca-certificates curl git sudo findutils unzip tar gzip xz-utils \
     build-essential \
     python3 python3-pip \
     nodejs npm \
@@ -77,4 +77,4 @@ COPY . /opt/dotfile
 COPY docker/entrypoint.sh /usr/local/bin/dotfile-entrypoint
 
 ENTRYPOINT ["dotfile-entrypoint"]
-CMD ["zsh", "-l"]
+CMD ["bash", "-l"]
