@@ -429,30 +429,34 @@ if luasnip_ok then
 end
 
 -- zbirenbaum/copilot.lua - copilot
-local copilot_ok, copilot = pcall(require, "copilot")
-if copilot_ok then
-    local copilot_node = (vim.fn.executable("/opt/homebrew/bin/node") == 1) and "/opt/homebrew/bin/node" or "node"
-    copilot.setup({
-        copilot_node_command = copilot_node,
-        panel = {
-            enabled = false,
-        },
-        suggestion = {
-            enabled = true,
-            auto_trigger = true,
-            keymap = {
-                accept = "<C-y>",
-                accept_word = false,
-                accept_line = false,
-                next = "<C-j>",
-                prev = "<C-k>",
-                dismiss = "<C-]>",
+-- If lazy failed to install this plugin (e.g. weak network), do not trigger lazy loader errors.
+local copilot_plugin_path = vim.fn.stdpath("data") .. "/lazy/copilot.lua"
+if vim.loop.fs_stat(copilot_plugin_path) then
+    local copilot_ok, copilot = pcall(require, "copilot")
+    if copilot_ok then
+        local copilot_node = (vim.fn.executable("/opt/homebrew/bin/node") == 1) and "/opt/homebrew/bin/node" or "node"
+        copilot.setup({
+            copilot_node_command = copilot_node,
+            panel = {
+                enabled = false,
             },
-        },
-        filetypes = {
-            help = false,
-        },
-    })
+            suggestion = {
+                enabled = true,
+                auto_trigger = true,
+                keymap = {
+                    accept = "<C-y>",
+                    accept_word = false,
+                    accept_line = false,
+                    next = "<C-j>",
+                    prev = "<C-k>",
+                    dismiss = "<C-]>",
+                },
+            },
+            filetypes = {
+                help = false,
+            },
+        })
+    end
 end
 
 
@@ -936,9 +940,6 @@ if dap_ok then
     -- dap {{{
     local dapui = require("dapui")
     local dapgo = require("dap-go")
-
-    require("dap.ext.vscode").load_launchjs()
-
 
     dap.listeners.before.attach.dapui_config = function()
         vim.opt.mouse = "a"
