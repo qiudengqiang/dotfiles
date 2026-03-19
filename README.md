@@ -4,21 +4,27 @@
 ```bash
 git clone <你的仓库地址> ~/workspace/github/dotfile
 cd ~/workspace/github/dotfile
-make macos
-make doctor
+make macos-bootstrap
+make macos-doctor
 ```
 
 ## 快速开始（容器，单镜像方式）
 ```bash
 cd ~/workspace/github/dotfile
-make build-image   # 本地重建镜像（默认 Debian slim 基础镜像）
+make build-image-amd64   # 构建本地 amd64 镜像（用于 x86 机器）
+make build-image-arm64   # 构建本地 arm64 镜像（用于 ARM 机器）
 # 如 Docker Hub 网络不稳，可切换基础镜像源：
-# BASE_IMAGE=<可访问镜像源>/debian:bookworm-slim make build-image
+# BASE_IMAGE=<可访问镜像源>/debian:bookworm-slim make build-image-amd64
 # 如需升级 Go 到更新稳定版（无需改 Dockerfile）：
-# GO_VERSION=<x.y.z> make build-image
+# GO_VERSION=<x.y.z> make build-image-amd64
+# 导出可传到离线/内网服务器的 amd64 tar：
+# make export-image-amd64
 # 或者：make pull-image 仅拉取远端镜像
+# 发布多架构镜像（amd64+arm64）：
+# make push-image
 make smoke
-make shell         # 复用正在运行的 dotfile-dev；没有则自动创建
+make up            # 启动容器 terminal-env
+make shell         # 进入已启动容器
 
 # 用完清理容器资源
 make clean
@@ -28,17 +34,20 @@ make clean
 ## 常用命令
 ```bash
 # macOS 宿主机恢复
-make macos
-make macos-dry-run
+make macos-bootstrap
+make macos-bootstrap-dry-run
 
 # 执行环境自检（失败返回非 0）
-make doctor
+make macos-doctor
 
 # 容器环境（不污染宿主机）
-make build-image
+make build-image-amd64
+make build-image-arm64
+make export-image-amd64
 make pull-image
 make push-image
 make smoke
+make up
 make shell
 make bootstrap
 make ps

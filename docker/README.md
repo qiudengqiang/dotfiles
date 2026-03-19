@@ -4,7 +4,7 @@
 在不污染宿主机的前提下，复现你的 terminal + nvim 使用习惯。
 
 核心原则：
-- 只维护一个固定镜像标签：`vinoqiu/terminal-env:stable`（本地通过 `make build-image` 重新构建）
+- 只维护一个固定镜像标签：`vinoqiu/terminal-env:stable`（本地按架构通过 `make build-image-amd64` / `make build-image-arm64` 构建）
 - 默认基础镜像使用 `debian:bookworm-slim`（最小可用，专注 Neovim 开发依赖）
 - 宿主机发行版无关（macOS/Linux 均可），统一使用同一个镜像标签
 - 只要宿主机能运行 Docker，即可拉起同一套环境
@@ -18,25 +18,32 @@
 ```bash
 cd ~/workspace/github/dotfile
 
-# 本地重建镜像
-make build-image
+# 本地重建镜像（按架构）
+make build-image-amd64
+make build-image-arm64
 
 # 如 Docker Hub 网络波动，可切换基础镜像源
-BASE_IMAGE=<可访问镜像源>/debian:bookworm-slim make build-image
+BASE_IMAGE=<可访问镜像源>/debian:bookworm-slim make build-image-amd64
 
 # 如需升级 Go 到更新稳定版（无需改 Dockerfile）
-GO_VERSION=<x.y.z> make build-image
+GO_VERSION=<x.y.z> make build-image-amd64
+
+# 导出 amd64 tar（给无法访问 Docker Hub 的服务器）
+make export-image-amd64
 
 # 仅拉取远端镜像
 make pull-image
 
-# 推送镜像到dockerhub
+# 推送镜像到dockerhub（默认发布 linux/amd64 + linux/arm64 多架构）
 make push-image
 
 # 烟雾测试（输出 nvim/node/rg/fd/fzf/prettier/black/stylua/dlv 版本）
 make smoke
 
-# 进入交互环境（复用运行中的 dotfile-dev；不存在则自动创建）
+# 启动容器（名称默认 terminal-env）
+make up
+
+# 进入交互环境（仅进入已运行容器）
 make shell
 
 # 仅做软链映射初始化（不进入 shell）
@@ -55,7 +62,13 @@ make clean
 cd ~/workspace/github/dotfile
 
 # 本地构建
-docker compose build --pull --no-cache dev
+docker buildx build \
+  --platform linux/amd64 \
+  --build-arg BASE_IMAGE=debian:bookworm-slim \
+  --build-arg GO_VERSION=1.24.3 \
+  -f docker/Dockerfile.debian-bookworm \
+  -t vinoqiu/terminal-env:stable \
+  --load .
 
 # 进入环境
 docker run -it --rm \
@@ -71,11 +84,17 @@ docker run -it --rm \
 # 登录
 docker login
 
-# 本地重建镜像
-docker compose build --pull --no-cache dev
+# 发布多架构镜像到 Docker Hub
+docker buildx build \
+  --platform linux/amd64,linux/arm64 \
+  --build-arg BASE_IMAGE=debian:bookworm-slim \
+  --build-arg GO_VERSION=1.24.3 \
+  -f docker/Dockerfile.debian-bookworm \
+  -t vinoqiu/terminal-env:stable \
+  --push .
 
-# 推送到 Docker Hub
-docker push vinoqiu/terminal-env:stable
+# 验证远端 manifest
+docker manifest inspect vinoqiu/terminal-env:stable
 ```
 
 ## 容器行为说明
@@ -85,8 +104,8 @@ docker push vinoqiu/terminal-env:stable
   - `~/.zshrc -> /opt/dotfile/.zshrc`
   - `~/.config/nvim -> /opt/dotfile/.config/nvim`
 - 默认进入 `zsh -l`
-- `make shell` 会直接进入容器 shell，不需要额外登录
-- 首次 `make shell` 会自动预热 Neovim（Lazy 插件 + Mason 常用工具），首次耗时会更长
+- `make up` 负责启动容器，`make shell` 只负责进入容器
+- 首次 `make up` 会自动预热 Neovim（Lazy 插件 + Mason 常用工具），首次耗时会更长
 - 宿主机目录映射：
   - 仓库映射到容器 `/opt/dotfile`
   - `~` 映射到容器 `/work`
@@ -123,7 +142,7 @@ volumes:
   - .:/opt/dotfile
 ```
 
-改完后重新执行 `make shell` 即可生效。
+改完后重新执行 `make up`（必要时先 `make clean`）再 `make shell` 即可生效。
 
 ## 验收标准
 进入容器后执行以下命令，均应有版本输出且返回 0：
@@ -158,7 +177,7 @@ curl -I https://auth.docker.io/token
 - 检查 Docker daemon 的 registry mirror 配置
 - 构建时切换基础镜像源：
 ```bash
-BASE_IMAGE=<可访问镜像源>/debian:bookworm-slim make build-image
+BASE_IMAGE=<可访问镜像源>/debian:bookworm-slim make build-image-amd64
 ```
 
 ### 2) Apple Silicon 机器（M 系列）

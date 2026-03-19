@@ -7,7 +7,7 @@ services:
         BASE_IMAGE: ${BASE_IMAGE:-debian:bookworm-slim}
         GO_VERSION: ${GO_VERSION:-1.24.3}
     image: vinoqiu/terminal-env:stable
-    container_name: dotfile-dev
+    container_name: ${CONTAINER_NAME:-terminal-env}
     volumes:
       - .:/opt/dotfile
       - ${HOME}:/work

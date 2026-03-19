@@ -21,12 +21,12 @@ cd ~/workspace/github/dotfile
 
 ## 2. 执行一键恢复
 ```bash
-make macos
+make macos-bootstrap
 ```
 
 先预演（不做修改）：
 ```bash
-make macos-dry-run
+make macos-bootstrap-dry-run
 ```
 
 脚本会做这些事：
@@ -45,7 +45,7 @@ make macos-dry-run
 ## 3. 恢复后自检
 ```bash
 source ~/.zshrc
-make doctor
+make macos-doctor
 nvim --version
 nvim
 ```
