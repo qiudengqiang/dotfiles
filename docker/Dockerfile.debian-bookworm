@@ -1,0 +1,80 @@
+ARG BASE_IMAGE=debian:bookworm-slim
+FROM ${BASE_IMAGE}
+
+ARG TARGETARCH
+
+ENV DOTFILES_DIR=/opt/dotfile
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PATH="/usr/local/go/bin:/root/.local/bin:/root/go/bin:${PATH}"
+
+RUN apt-get -o Acquire::Retries=5 update \
+  && apt-get install -y --no-install-recommends --fix-missing -o Acquire::Retries=5 \
+    ca-certificates curl git zsh sudo findutils unzip tar gzip xz-utils \
+    build-essential \
+    python3 python3-pip \
+    nodejs npm \
+    ripgrep fd-find fzf \
+  && rm -rf /var/lib/apt/lists/*
+
+ARG GO_VERSION=1.24.3
+RUN arch="${TARGETARCH:-$(dpkg --print-architecture)}" \
+  && case "$arch" in \
+    amd64|x86_64) go_arch="amd64" ;; \
+    arm64|aarch64) go_arch="arm64" ;; \
+    *) echo "unsupported arch: $arch" && exit 1 ;; \
+  esac \
+  && go_file="/tmp/go${GO_VERSION}.linux-${go_arch}.tar.gz" \
+  && go_url="https://go.dev/dl/go${GO_VERSION}.linux-${go_arch}.tar.gz" \
+  && (curl -fL --connect-timeout 8 --max-time 180 --retry 3 --retry-all-errors "$go_url" -o "$go_file" \
+      || curl -fL --connect-timeout 8 --max-time 180 --retry 3 --retry-all-errors "https://dl.google.com/go/go${GO_VERSION}.linux-${go_arch}.tar.gz" -o "$go_file" \
+      || curl -fL --connect-timeout 8 --max-time 180 --retry 3 --retry-all-errors "https://ghproxy.cn/${go_url}" -o "$go_file" \
+      || curl -fL --connect-timeout 8 --max-time 180 --retry 3 --retry-all-errors "https://ghproxy.cfd/${go_url}" -o "$go_file") \
+  && rm -rf /usr/local/go \
+  && tar -C /usr/local -xzf "$go_file" \
+  && ln -sf /usr/local/go/bin/go /usr/local/bin/go \
+  && ln -sf /usr/local/go/bin/gofmt /usr/local/bin/gofmt \
+  && rm -f "$go_file"
+
+RUN arch="${TARGETARCH:-$(dpkg --print-architecture)}" \
+  && case "$arch" in \
+    amd64|x86_64) nvim_arch="x86_64" ;; \
+    arm64|aarch64) nvim_arch="arm64" ;; \
+    *) echo "unsupported arch: $arch" && exit 1 ;; \
+  esac \
+  && nvim_url="https://github.com/neovim/neovim/releases/download/stable/nvim-linux-${nvim_arch}.tar.gz" \
+  && nvim_file="/tmp/nvim-linux-${nvim_arch}.tar.gz" \
+  && (curl -fL --connect-timeout 8 --max-time 180 --retry 3 --retry-all-errors "$nvim_url" -o "$nvim_file" \
+      || curl -fL --connect-timeout 8 --max-time 180 --retry 3 --retry-all-errors "https://ghproxy.cn/${nvim_url}" -o "$nvim_file" \
+      || curl -fL --connect-timeout 8 --max-time 180 --retry 3 --retry-all-errors "https://ghproxy.cfd/${nvim_url}" -o "$nvim_file") \
+  && tar -C /opt -xzf "$nvim_file" \
+  && ln -sf "/opt/nvim-linux-${nvim_arch}/bin/nvim" /usr/local/bin/nvim \
+  && rm -f "$nvim_file"
+
+RUN if command -v fdfind >/dev/null 2>&1 && ! command -v fd >/dev/null 2>&1; then ln -s "$(command -v fdfind)" /usr/local/bin/fd; fi
+
+RUN npm config set registry https://registry.npmmirror.com \
+  && npm install -g prettier \
+  && python3 -m pip install --user --break-system-packages --upgrade pip -i https://mirrors.aliyun.com/pypi/simple/ \
+  && python3 -m pip install --user --break-system-packages black -i https://mirrors.aliyun.com/pypi/simple/ \
+  && arch="${TARGETARCH:-$(dpkg --print-architecture)}" \
+  && case "$arch" in \
+    amd64|x86_64) stylua_arch="x86_64" ;; \
+    arm64|aarch64) stylua_arch="aarch64" ;; \
+    *) echo "unsupported arch: $arch" && exit 1 ;; \
+  esac \
+  && stylua_url="https://github.com/JohnnyMorganz/StyLua/releases/latest/download/stylua-linux-${stylua_arch}.zip" \
+  && stylua_file="/tmp/stylua-linux-${stylua_arch}.zip" \
+  && (curl -fL --connect-timeout 8 --max-time 180 --retry 3 --retry-all-errors "$stylua_url" -o "$stylua_file" \
+      || curl -fL --connect-timeout 8 --max-time 180 --retry 3 --retry-all-errors "https://ghproxy.cn/${stylua_url}" -o "$stylua_file" \
+      || curl -fL --connect-timeout 8 --max-time 180 --retry 3 --retry-all-errors "https://ghproxy.cfd/${stylua_url}" -o "$stylua_file") \
+  && unzip -q "$stylua_file" -d /tmp/stylua \
+  && install -m 0755 /tmp/stylua/stylua /usr/local/bin/stylua \
+  && GO111MODULE=on GONOSUMDB='*' GOPROXY=https://goproxy.cn,direct GOBIN=/usr/local/bin go install github.com/go-delve/delve/cmd/dlv@latest \
+  && rm -rf /tmp/stylua "$stylua_file"
+
+WORKDIR /work
+COPY . /opt/dotfile
+COPY docker/entrypoint.sh /usr/local/bin/dotfile-entrypoint
+
+ENTRYPOINT ["dotfile-entrypoint"]
+CMD ["zsh", "-l"]

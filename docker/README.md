@@ -5,6 +5,7 @@
 
 核心原则：
 - 只维护一个固定镜像标签：`vinoqiu/terminal-env:stable`（本地通过 `make build-image` 重新构建）
+- 默认基础镜像使用 `debian:bookworm-slim`（最小可用，专注 Neovim 开发依赖）
 - 宿主机发行版无关（macOS/Linux 均可），统一使用同一个镜像标签
 - 只要宿主机能运行 Docker，即可拉起同一套环境
 
@@ -19,6 +20,12 @@ cd ~/workspace/github/dotfile
 
 # 本地重建镜像
 make build-image
+
+# 如 Docker Hub 网络波动，可切换基础镜像源
+BASE_IMAGE=<可访问镜像源>/debian:bookworm-slim make build-image
+
+# 如需升级 Go 到更新稳定版（无需改 Dockerfile）
+GO_VERSION=<x.y.z> make build-image
 
 # 仅拉取远端镜像
 make pull-image
@@ -53,8 +60,8 @@ docker compose build --pull --no-cache dev
 # 进入环境
 docker run -it --rm \
   -v "$PWD":/opt/dotfile \
-  -v "$HOME/workspace":/workspace \
-  -w /workspace \
+  -v "$HOME":/work \
+  -w /work \
   vinoqiu/terminal-env:stable \
   zsh -l
 ```
@@ -82,7 +89,7 @@ docker push vinoqiu/terminal-env:stable
 - 首次 `make shell` 会自动预热 Neovim（Lazy 插件 + Mason 常用工具），首次耗时会更长
 - 宿主机目录映射：
   - 仓库映射到容器 `/opt/dotfile`
-  - `~/workspace` 映射到容器 `/workspace`
+  - `~` 映射到容器 `/work`
 
 ## 本地目录变动怎么改
 如果你本地目录结构变了，修改 `docker-compose.yml` 的 `services.dev.volumes` 左侧宿主机路径即可。
@@ -91,23 +98,23 @@ docker push vinoqiu/terminal-env:stable
 ```yaml
 volumes:
   - .:/opt/dotfile
-  - ${HOME}/workspace:/workspace
+  - ${HOME}:/work
 ```
 
 常见改法：
-1. `workspace` 不在 `~/workspace`
+1. 不想挂载整个 `HOME`，只挂载一个代码目录
 ```yaml
 volumes:
   - .:/opt/dotfile
-  - /你的实际路径/workspace:/workspace
+  - /你的实际路径:/work
 ```
 
 2. 需要挂载多个代码目录
 ```yaml
 volumes:
   - .:/opt/dotfile
-  - /path/a:/workspace/a
-  - /path/b:/workspace/b
+  - /path/a:/work/a
+  - /path/b:/work/b
 ```
 
 3. 只想要 dotfile，不挂载 workspace
@@ -149,6 +156,10 @@ curl -I https://auth.docker.io/token
 - 重试
 - 检查代理/公司网络策略
 - 检查 Docker daemon 的 registry mirror 配置
+- 构建时切换基础镜像源：
+```bash
+BASE_IMAGE=<可访问镜像源>/debian:bookworm-slim make build-image
+```
 
 ### 2) Apple Silicon 机器（M 系列）
 - 如果你使用的是 `amd64` 镜像，会走仿真，速度可能变慢

@@ -11,7 +11,11 @@ make doctor
 ## 快速开始（容器，单镜像方式）
 ```bash
 cd ~/workspace/github/dotfile
-make build-image   # 本地重建镜像
+make build-image   # 本地重建镜像（默认 Debian slim 基础镜像）
+# 如 Docker Hub 网络不稳，可切换基础镜像源：
+# BASE_IMAGE=<可访问镜像源>/debian:bookworm-slim make build-image
+# 如需升级 Go 到更新稳定版（无需改 Dockerfile）：
+# GO_VERSION=<x.y.z> make build-image
 # 或者：make pull-image 仅拉取远端镜像
 make smoke
 make shell         # 复用正在运行的 dotfile-dev；没有则自动创建

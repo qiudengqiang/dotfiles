@@ -1,5 +1,8 @@
 .PHONY: macos macos-dry-run doctor dev shell bootstrap smoke build-image pull-image ps logs clean
 
+BASE_IMAGE ?= debian:bookworm-slim
+GO_VERSION ?= 1.24.3
+
 macos:
 	./macos/bootstrap.sh
 
@@ -26,10 +29,10 @@ bootstrap:
 	docker compose run --rm dev bootstrap
 
 smoke:
-	docker compose run --rm dev bash -lc 'set -e; nvim --version | head -n1; node --version; rg --version | head -n1; fd --version; fzf --version; prettier --version; black --version; stylua --version; dlv version | head -n1'
+	docker compose run --rm dev bash -lc 'set -euo pipefail; nvim --version | head -n1; node --version; rg --version | head -n1; fd --version; fzf --version; prettier --version; black --version; stylua --version; dlv version | head -n1'
 
 build-image:
-	docker compose build --pull --no-cache dev
+	BASE_IMAGE=$(BASE_IMAGE) GO_VERSION=$(GO_VERSION) docker compose build --pull --no-cache dev
 
 pull-image:
 	docker pull vinoqiu/terminal-env:stable
