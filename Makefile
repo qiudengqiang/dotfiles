@@ -1,4 +1,4 @@
-.PHONY: macos-bootstrap macos-bootstrap-dry-run macos-doctor up up-host shell bootstrap smoke build-image-amd64 build-image-arm64 export-image-amd64 pull-image push-image ps logs clean
+.PHONY: macos-bootstrap macos-bootstrap-dry-run macos-doctor dotfile-bootstrap up up-host shell bootstrap smoke build-image-amd64 build-image-arm64 export-image-amd64 pull-image push-image ps logs clean
 
 BASE_IMAGE ?= debian:bookworm-slim
 GO_VERSION ?= 1.24.3
@@ -16,6 +16,9 @@ macos-bootstrap-dry-run:
 
 macos-doctor:
 	./macos/doctor.sh
+
+dotfile-bootstrap:
+	./linux/bootstrap.sh
 
 up:
 	CONTAINER_NAME=$(CONTAINER_NAME) $(DOCKER_COMPOSE) up -d dev

@@ -41,6 +41,9 @@ make macos-bootstrap-dry-run
 # 执行环境自检（失败返回非 0）
 make macos-doctor
 
+# 手动同步点文件（把系统配置软链到当前仓库）
+make dotfile-bootstrap
+
 # 容器环境（不污染宿主机）
 make build-image-amd64
 make build-image-arm64
@@ -66,6 +69,7 @@ make clean
 dotfile/
 ├── Makefile
 ├── macos/                    # macOS 脚本与文档
+├── linux/                    # Linux 点文件同步脚本
 ├── docker/                   # Docker 相关脚本与文档
 ├── docker-compose.yml
 └── .bash_profile/.bashrc/.wezterm.lua/.config（可选 .zshrc）
