@@ -28,6 +28,6 @@ setopt AUTO_CD
 # Autosuggestion
 bindkey '^_' autosuggest-accept
 export ZSH_AUTOSUGGEST_STRATEGY=(history completion)
-PROMPT='%F{blue}%n@%m%f:%F{green}%2~%f%# '
+PROMPT='%F{red}%n@%m%f:%F{green}%2~%f%F{yellow}$(git_prompt_info)%f%# '
 # Local-only overrides (not committed)
 [[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"

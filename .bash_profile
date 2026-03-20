@@ -62,6 +62,8 @@ alias p3s='python3 -m http.server'
 alias proxy_on='export http_proxy=http://127.0.0.1:7890; export https_proxy=http://127.0.0.1:7890; export all_proxy=socks5://127.0.0.1:7891; echo "🟢 Proxy ON"'
 alias proxy_off='unset http_proxy; unset https_proxy; unset all_proxy; echo "🔴 Proxy OFF"'
 
+alias loginexp='exec ~/workspace/data/script/login.exp'
+
 # Optional local/private overrides (company hosts, secrets, proxies, etc.)
 if [[ -f "$HOME/.bash_profile.local" ]]; then
   # shellcheck source=/dev/null
