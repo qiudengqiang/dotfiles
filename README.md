@@ -41,7 +41,7 @@ make macos-bootstrap-dry-run
 # 执行环境自检（失败返回非 0）
 make macos-doctor
 
-# 手动同步点文件（把系统配置软链到当前仓库）
+# 手动同步点文件（把系统配置软链到当前仓库，含 ~/.zshrc）
 make dotfile-bootstrap
 
 # 容器环境（不污染宿主机）

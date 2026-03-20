@@ -42,6 +42,7 @@ link_item() {
 main() {
   link_item ".bash_profile"
   link_item ".bashrc"
+  link_item ".zshrc"
   link_item ".config/nvim"
   link_item ".wezterm.lua"
 

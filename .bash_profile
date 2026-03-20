@@ -32,7 +32,7 @@ fi
 
 # Go defaults.
 if command -v go >/dev/null 2>&1 || [[ -d /usr/local/go ]]; then
-  export GOPATH="${GOPATH:-$HOME/GOPATH}"
+  export GOPATH="${GOPATH:-$HOME/workspace/go}"
   add_path "/usr/local/go/bin" "$GOPATH/bin"
   export PATH
 fi
