@@ -5,6 +5,8 @@ return {
   font = wezterm.font("MesloLGL Nerd Font"),
   font_size = 13.5,
   color_scheme = "Kanagawa (Gogh)",
+  initial_cols = 80,
+  initial_rows = 20,
   scrollback_lines = 100000,
   enable_tab_bar = true,
   hide_tab_bar_if_only_one_tab = true,
