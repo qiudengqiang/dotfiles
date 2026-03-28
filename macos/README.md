@@ -33,7 +33,7 @@ make macos-bootstrap-dry-run
 1. 检查并安装 Xcode CLT
 2. 检查并安装 Homebrew
 3. `brew bundle --file macos/Brewfile` 安装工具
-4. 安装终端图标字体 `font-meslo-lg-nerd-font`（WezTerm / Neovim 图标依赖它）
+4. 从仓库内置的 `assets/fonts/` 安装 `MesloLGL Nerd Font`（缺失时才回退到 `brew install --cask font-meslo-lg-nerd-font`）
 5. 检查并补齐 Neovim 外部工具（`prettier`/`stylua`/`delve`，`black` 走 `pipx/pip` 回退安装）
 6. 备份已有配置到 `~/.dotfiles_bak/<时间戳>/`
 7. 建立软链接：
@@ -67,6 +67,7 @@ nvim
 - WezTerm: `~/.wezterm.lua` 已默认指定 `MesloLGL Nerd Font`，只要字体安装成功即可
 - iTerm2: Profiles -> Text -> Font，选择 `MesloLGL Nerd Font`
 - Terminal.app: 设置 -> 配置描述文件 -> 文本 -> 字体，选择 `MesloLGL Nerd Font`
+- 仓库已内置最小字体集在 `assets/fonts/`，避免新机器初始化时卡在 GitHub 下载字体包
 
 执行自检时也会检查字体：
 ```bash

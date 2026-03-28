@@ -5,6 +5,7 @@ REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BACKUP_ROOT="$HOME/.dotfiles_bak"
 TIMESTAMP="$(date +%Y%m%d%H%M%S)"
 BACKUP_DIR="$BACKUP_ROOT/$TIMESTAMP"
+VENDORED_FONT_DIR="$REPO_DIR/assets/fonts"
 MODE="apply"
 
 info() { printf "\033[1;34m[INFO]\033[0m %s\n" "$*"; }
@@ -45,7 +46,7 @@ print_plan() {
   info "[dry-run] 1) Ensure Xcode CLT"
   info "[dry-run] 2) Ensure Homebrew"
   info "[dry-run] 3) Install Brewfile packages"
-  info "[dry-run] 4) Ensure MesloLGL Nerd Font for terminal icons"
+  info "[dry-run] 4) Install MesloLGL Nerd Font from repo assets (fallback to brew only if missing)"
   info "[dry-run] 5) Ensure external tools: prettier/black/stylua/dlv"
   info "[dry-run] 6) Ensure Oh My Zsh + plugins"
   for target in ".bash_profile" ".bashrc" ".zshrc" ".wezterm.lua" ".config/nvim"; do
@@ -117,6 +118,41 @@ has_meslo_nerd_font() {
   return 1
 }
 
+has_vendored_nerd_font() {
+  local files=(
+    "MesloLGLNerdFont-Regular.ttf"
+    "MesloLGLNerdFont-Italic.ttf"
+    "MesloLGLNerdFont-Bold.ttf"
+    "MesloLGLNerdFont-BoldItalic.ttf"
+  )
+
+  local file
+  for file in "${files[@]}"; do
+    if [[ ! -f "$VENDORED_FONT_DIR/$file" ]]; then
+      return 1
+    fi
+  done
+
+  return 0
+}
+
+install_vendored_nerd_font() {
+  local dst_dir="$HOME/Library/Fonts"
+  local files=(
+    "MesloLGLNerdFont-Regular.ttf"
+    "MesloLGLNerdFont-Italic.ttf"
+    "MesloLGLNerdFont-Bold.ttf"
+    "MesloLGLNerdFont-BoldItalic.ttf"
+  )
+
+  mkdir -p "$dst_dir"
+
+  local file
+  for file in "${files[@]}"; do
+    cp "$VENDORED_FONT_DIR/$file" "$dst_dir/$file"
+  done
+}
+
 ensure_nerd_font() {
   local cask="font-meslo-lg-nerd-font"
 
@@ -125,16 +161,26 @@ ensure_nerd_font() {
     return
   fi
 
-  info "Installing terminal font: $cask"
+  if has_vendored_nerd_font; then
+    info "Installing terminal font from repo assets"
+    install_vendored_nerd_font
+    if has_meslo_nerd_font; then
+      info "Terminal font installed from repo assets: MesloLGL Nerd Font"
+      return
+    fi
+    warn "Repo font assets exist but install did not complete as expected."
+  fi
+
+  info "Repo font assets missing, fallback to brew cask: $cask"
   if brew install --cask "$cask"; then
     if has_meslo_nerd_font; then
-      info "Terminal font installed: MesloLGL Nerd Font"
+      info "Terminal font installed via Homebrew: MesloLGL Nerd Font"
       return
     fi
   fi
 
   warn "Failed to install MesloLGL Nerd Font automatically."
-  warn "If nvim icons are missing, run: brew install --cask $cask"
+  warn "Check repo assets under $VENDORED_FONT_DIR or run: brew install --cask $cask"
 }
 
 ensure_external_tools() {
