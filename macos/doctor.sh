@@ -90,6 +90,46 @@ check_link_or_file() {
   fi
 }
 
+check_meslo_nerd_font() {
+  local font_paths=(
+    "$HOME_DIR/Library/Fonts/MesloLGLNerdFont-Regular.ttf"
+    "/Library/Fonts/MesloLGLNerdFont-Regular.ttf"
+  )
+
+  local found_path=""
+  for path in "${font_paths[@]}"; do
+    if [[ -f "$path" ]]; then
+      found_path="$path"
+      break
+    fi
+  done
+
+  if [[ -n "$found_path" ]]; then
+    ok "发现 Nerd Font: $found_path"
+  else
+    fail "缺少 MesloLGL Nerd Font，请执行: brew install --cask font-meslo-lg-nerd-font"
+  fi
+
+  local wezterm_path="$HOME_DIR/.wezterm.lua"
+  if [[ ! -f "$wezterm_path" ]]; then
+    warn "未发现 WezTerm 配置: $wezterm_path"
+    return
+  fi
+
+  local font_name
+  font_name="$(sed -n 's/.*wezterm\.font("\([^"]*\)").*/\1/p' "$wezterm_path" | head -n 1)"
+  if [[ -z "$font_name" ]]; then
+    warn "未能从 WezTerm 配置中解析字体名: $wezterm_path"
+    return
+  fi
+
+  if [[ "$font_name" == "MesloLGL Nerd Font" ]]; then
+    ok "WezTerm 字体配置正确: $font_name"
+  else
+    warn "WezTerm 当前字体不是 MesloLGL Nerd Font: $font_name"
+  fi
+}
+
 check_nvim_health_hint() {
   if ! command -v nvim >/dev/null 2>&1; then
     return
@@ -152,7 +192,7 @@ detect_linux_distro() {
 }
 
 main() {
-  local total_checks=5
+  local total_checks=6
   detect_linux_distro
   echo "== Dotfile Doctor =="
   echo "os: $OS"
@@ -168,6 +208,9 @@ main() {
   check_link_or_file ".bashrc"
   check_link_or_file ".zshrc"
   check_link_or_file ".config/nvim"
+  if [[ "$OS" == "Darwin" ]]; then
+    check_link_or_file ".wezterm.lua"
+  fi
   echo
 
   echo "[2/${total_checks}] 基础命令"
@@ -179,15 +222,23 @@ main() {
   check_cmd_optional node
   echo
 
-  echo "[3/${total_checks}] Neovim"
+  echo "[3/${total_checks}] 终端字体"
+  if [[ "$OS" == "Darwin" ]]; then
+    check_meslo_nerd_font
+  else
+    warn "字体检查目前仅覆盖 macOS"
+  fi
+  echo
+
+  echo "[4/${total_checks}] Neovim"
   check_nvim_health_hint
   echo
 
-  echo "[4/${total_checks}] Copilot"
+  echo "[5/${total_checks}] Copilot"
   check_copilot_hint
   echo
 
-  echo "[5/${total_checks}] 外部工具"
+  echo "[6/${total_checks}] 外部工具"
   check_external_tools_optional
   echo
 

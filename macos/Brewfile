@@ -13,3 +13,4 @@ brew "delve"
 # 终端（可选）
 cask "iterm2"
 cask "wezterm"
+cask "font-meslo-lg-nerd-font"

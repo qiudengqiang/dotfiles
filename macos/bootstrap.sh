@@ -45,8 +45,9 @@ print_plan() {
   info "[dry-run] 1) Ensure Xcode CLT"
   info "[dry-run] 2) Ensure Homebrew"
   info "[dry-run] 3) Install Brewfile packages"
-  info "[dry-run] 4) Ensure external tools: prettier/black/stylua/dlv"
-  info "[dry-run] 5) Ensure Oh My Zsh + plugins"
+  info "[dry-run] 4) Ensure MesloLGL Nerd Font for terminal icons"
+  info "[dry-run] 5) Ensure external tools: prettier/black/stylua/dlv"
+  info "[dry-run] 6) Ensure Oh My Zsh + plugins"
   for target in ".bash_profile" ".bashrc" ".zshrc" ".wezterm.lua" ".config/nvim"; do
     local src="$REPO_DIR/$target"
     local dst="$HOME/$target"
@@ -99,6 +100,41 @@ install_brew_packages() {
   if ! brew bundle --file "$brewfile"; then
     warn "brew bundle has failures; continue with fallback installers."
   fi
+}
+
+has_meslo_nerd_font() {
+  local roots=(
+    "$HOME/Library/Fonts"
+    "/Library/Fonts"
+  )
+
+  for root in "${roots[@]}"; do
+    if [[ -f "$root/MesloLGLNerdFont-Regular.ttf" ]]; then
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+ensure_nerd_font() {
+  local cask="font-meslo-lg-nerd-font"
+
+  if has_meslo_nerd_font; then
+    info "Nerd Font already installed: MesloLGL Nerd Font"
+    return
+  fi
+
+  info "Installing terminal font: $cask"
+  if brew install --cask "$cask"; then
+    if has_meslo_nerd_font; then
+      info "Terminal font installed: MesloLGL Nerd Font"
+      return
+    fi
+  fi
+
+  warn "Failed to install MesloLGL Nerd Font automatically."
+  warn "If nvim icons are missing, run: brew install --cask $cask"
 }
 
 ensure_external_tools() {
@@ -248,6 +284,7 @@ main() {
   ensure_xcode_clt
   ensure_homebrew
   install_brew_packages
+  ensure_nerd_font
   ensure_external_tools
   print_external_tools_status
   ensure_oh_my_zsh
@@ -268,8 +305,9 @@ main() {
 
 Next steps:
 1) 重开终端，执行: source ~/.zshrc
-2) 打开 nvim，等待 lazy.nvim 安装插件
-3) 执行 :Copilot auth signin 完成 Copilot 登录
+2) 如果你用 iTerm2 / Terminal.app，请把终端字体切到 MesloLGL Nerd Font
+3) 打开 nvim，等待 lazy.nvim 安装插件
+4) 执行 :Copilot auth signin 完成 Copilot 登录
 
 EOT
 }
