@@ -21,12 +21,42 @@ return {
 	hide_tab_bar_if_only_one_tab = true,
 	native_macos_fullscreen_mode = true,
 
+	-- 渲染
+	front_end = "WebGpu",
+	max_fps = 120,
+	animation_fps = 120,
+
+	-- 右上角显示当前目录
+	wezterm.on("update-right-status", function(window)
+		local pane = window:active_pane()
+		local cwd = pane:get_current_working_dir()
+		local dir = ""
+
+		if cwd then
+			dir = cwd.file_path:match("[^/]+$") or ""
+		end
+
+		window:set_right_status(wezterm.format({
+			{ Foreground = { Color = "lightgray" } },
+			{ Text = " " .. dir .. " " },
+		}))
+	end),
+
+	-- inactive pane style（亮度、饱和度）
+	inactive_pane_hsb = {
+        saturation = 0.7,
+		brightness = 0.5,
+	},
+
 	keys = {
-		-- 分屏
+		-- fullscreen
+		{ key = "Enter", mods = "CMD", action = act.ToggleFullScreen },
+
+		-- pane split
 		{ key = "\\", mods = "ALT", action = act.SplitHorizontal({ domain = "CurrentPaneDomain" }) },
 		{ key = "-", mods = "ALT", action = act.SplitVertical({ domain = "CurrentPaneDomain" }) },
 
-		-- pane 切换
+		-- pane shift
 		{ key = "h", mods = "ALT", action = act.ActivatePaneDirection("Left") },
 		{ key = "j", mods = "ALT", action = act.ActivatePaneDirection("Down") },
 		{ key = "k", mods = "ALT", action = act.ActivatePaneDirection("Up") },
@@ -38,8 +68,7 @@ return {
 		{ key = "K", mods = "ALT|SHIFT", action = act.AdjustPaneSize({ "Up", 5 }) },
 		{ key = "J", mods = "ALT|SHIFT", action = act.AdjustPaneSize({ "Down", 5 }) },
 
-		--  pane zoom
+		-- pane zoom
 		{ key = "Enter", mods = "ALT", action = act.TogglePaneZoomState },
-		{ key = "Enter", mods = "CMD", action = act.ToggleFullScreen },
 	},
 }
