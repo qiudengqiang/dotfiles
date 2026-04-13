@@ -224,6 +224,19 @@ function M.setup()
         })
     end
 
+    local aerial_ok, aerial = pcall(require, "aerial")
+    if aerial_ok then
+        aerial.setup({
+            backends = { "lsp", "treesitter", "markdown", "asciidoc", "man" },
+            layout = {
+                default_direction = "prefer_right",
+            },
+            show_guides = false,
+            open_automatic = false,
+            attach_mode = "global",
+        })
+    end
+
     local lualine_ok, lualine = pcall(require, "lualine")
     if lualine_ok then
         local filetype = { "filetype", icons_enabled = false, icon = nil }
@@ -265,6 +278,24 @@ function M.setup()
             },
             tabline = {},
             extensions = {},
+        })
+    end
+
+    local lspsaga_ok, lspsaga = pcall(require, "lspsaga")
+    if lspsaga_ok then
+        lspsaga.setup({
+            lightbulb = {
+                enable = false,
+            },
+            symbol_in_winbar = {
+                enable = true,
+                separator = " › ",
+                hide_keyword = false,
+                show_file = true,
+                folder_level = 1,
+                color_mode = true,
+                delay = 0,
+            },
         })
     end
 

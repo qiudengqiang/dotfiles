@@ -235,6 +235,35 @@
 | `PageUp` / `PageDown` | 结果列表翻页 |
 | `?` | 显示帮助 |
 
+### Telescope Projects 局部快捷键
+
+`Leader fp` 打开的是 `Telescope projects`，默认选中项目后会：
+
+1. 把当前窗口的工作目录切到该项目
+2. 继续打开这个项目下的 `find_files`
+
+#### 普通模式
+
+| 快捷键 | 作用 |
+| --- | --- |
+| `Enter` | 切到项目并打开 `find_files` |
+| `f` | 切到项目并打开 `find_files` |
+| `w` | 只切换当前窗口 cwd 到该项目 |
+| `s` | 切到项目并打开 `live_grep` |
+| `r` | 切到项目并打开项目内 `oldfiles` |
+| `d` | 从最近项目列表删除该项目 |
+
+#### 插入模式
+
+| 快捷键 | 作用 |
+| --- | --- |
+| `Enter` | 切到项目并打开 `find_files` |
+| `Ctrl-F` | 切到项目并打开 `find_files` |
+| `Ctrl-W` | 只切换当前窗口 cwd 到该项目 |
+| `Ctrl-S` | 切到项目并打开 `live_grep` |
+| `Ctrl-R` | 切到项目并打开项目内 `oldfiles` |
+| `Ctrl-D` | 从最近项目列表删除该项目 |
+
 ### NvimTree 局部快捷键
 
 这些是在 NvimTree 窗口内额外生效的键：

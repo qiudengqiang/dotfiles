@@ -26,22 +26,6 @@ return {
 	max_fps = 120,
 	animation_fps = 120,
 
-	-- 右上角显示当前目录
-	wezterm.on("update-right-status", function(window)
-		local pane = window:active_pane()
-		local cwd = pane:get_current_working_dir()
-		local dir = ""
-
-		if cwd then
-			dir = cwd.file_path:match("[^/]+$") or ""
-		end
-
-		window:set_right_status(wezterm.format({
-			{ Foreground = { Color = "lightgray" } },
-			{ Text = " " .. dir .. " " },
-		}))
-	end),
-
 	-- inactive pane style（亮度、饱和度）
 	inactive_pane_hsb = {
         saturation = 0.7,

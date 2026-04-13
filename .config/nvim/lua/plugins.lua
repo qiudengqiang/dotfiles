@@ -17,6 +17,7 @@ local is_macos = vim.fn.has("macunix") == 1
 require("lazy").setup({
     { "kylechui/nvim-surround" },
     { "farmergreg/vim-lastplace" },
+    { "stevearc/aerial.nvim" },
     { "windwp/nvim-autopairs" },
     { "akinsho/bufferline.nvim" },
     { "nvim-lualine/lualine.nvim" },
@@ -43,6 +44,7 @@ require("lazy").setup({
     { "williamboman/mason.nvim" }, -- simple to use language server installer
 
     -- lsp ui 增强
+    { "nvimdev/lspsaga.nvim" },
     { "folke/trouble.nvim", dependencies = "kyazdani42/nvim-web-devicons" },
 
     -- test
