@@ -74,3 +74,13 @@ dotfile/
 ├── docker-compose.yml
 └── .bash_profile/.bashrc/.wezterm.lua/.config（可选 .zshrc）
 ```
+
+## Neovim 增加一种语言支持
+- LSP server 列表在 [`.config/nvim/lua/configs.lua`](/Users/didi/workspace/src/dotfiles/.config/nvim/lua/configs.lua:1) 的 `lspconfig_ensure_installed`
+- 如果该 server 走系统安装，再同时加入 `system_managed_lsp_servers`
+- 如果该语言需要专属配置，就新增 [`.config/nvim/lua/langs`](/Users/didi/workspace/src/dotfiles/.config/nvim/lua/langs) 下对应的 `<server>.lua`
+- `configs.lua` 会自动执行 `require("langs." .. server)`，所以只要文件名和 server 名一致就会生效
+- 如果该语言还需要 formatter / treesitter / dap / test，再分别补到：
+  - [`.config/nvim/lua/format.lua`](/Users/didi/workspace/src/dotfiles/.config/nvim/lua/format.lua:1)
+  - [`.config/nvim/lua/configs.lua`](/Users/didi/workspace/src/dotfiles/.config/nvim/lua/configs.lua:725) 的 treesitter 配置
+  - 同文件里的 dap / neotest 相关配置

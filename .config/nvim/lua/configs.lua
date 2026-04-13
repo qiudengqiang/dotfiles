@@ -375,21 +375,6 @@ if lualine_ok then
     })
 end
 
--- nvimdev/lspsaga.nvim - lspsaga
-local lspsaga_ok, lspsaga = pcall(require, "lspsaga")
-if lspsaga_ok then
-    lspsaga.setup({
-        lightbulb = {
-            enable = false,
-        },
-        -- symbol_in_winbar = {
-        --     enable = true,
-        --     separator = "  ",
-        --     hide_keyword = false,
-        -- },
-    })
-end
-
 -- L3MON4D3/LuaSnip - luasnip
 local luasnip_ok, luasnip = pcall(require, "luasnip")
 if luasnip_ok then
@@ -530,15 +515,9 @@ local cmp_nvim_lsp_ok, cmp_nvim_lsp = pcall(require, "cmp_nvim_lsp")
 
 
 -- neovim/nvim-lspconfig -- lspconfig
-local has_new_lsp_api = (vim.lsp ~= nil and vim.lsp.config ~= nil and type(vim.lsp.enable) == "function")
-local lspconfig_ok, lspconfig = false, nil
-if not has_new_lsp_api then
-    lspconfig_ok, lspconfig = pcall(require, "lspconfig")
-end
-
-if has_new_lsp_api or lspconfig_ok then
+do
     -- Compatibility shim for plugins still calling deprecated API on nvim 0.11+.
-    if has_new_lsp_api and vim.lsp.buf_get_clients then
+    if vim.lsp.buf_get_clients then
         vim.lsp.buf_get_clients = function(opts)
             if type(opts) == "number" then
                 opts = { bufnr = opts }
@@ -688,12 +667,8 @@ if has_new_lsp_api or lspconfig_ok then
             server_opts = vim.tbl_deep_extend("force", server_opts, conf_opts)
         end
 
-        if has_new_lsp_api then
-            vim.lsp.config(server, server_opts)
-            vim.lsp.enable(server)
-        elseif lspconfig and lspconfig[server] then
-            lspconfig[server].setup(server_opts)
-        end
+        vim.lsp.config(server, server_opts)
+        vim.lsp.enable(server)
     end
 
     -- handlers.setup (modernized)
@@ -719,7 +694,6 @@ if has_new_lsp_api or lspconfig_ok then
             prefix = "",
         },
     })
-
 end
 
 -- nvim-treesitter/nvim-treesitter - nvim_treesitter_configs

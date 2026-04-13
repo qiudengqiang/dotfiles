@@ -56,7 +56,6 @@ require("lazy").setup({
     { "williamboman/mason-lspconfig.nvim" },
 
     -- lsp ui 增强
-    { "nvimdev/lspsaga.nvim" },
     { "folke/trouble.nvim", dependencies = "kyazdani42/nvim-web-devicons" },
 
     -- test
