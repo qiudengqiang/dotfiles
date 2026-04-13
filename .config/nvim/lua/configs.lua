@@ -1,13 +1,18 @@
 local lspconfig_ensure_installed = {
-    "gopls@1.24.1",
+    "gopls",
     "bashls",
     "yamlls",
     "lua_ls",
 }
 
 local mason_lsp_servers = {}
+local system_managed_lsp_servers = {
+    gopls = true,
+}
 for _, server in ipairs(lspconfig_ensure_installed) do
-    table.insert(mason_lsp_servers, vim.split(server, "@")[1])
+    if not system_managed_lsp_servers[server] then
+        table.insert(mason_lsp_servers, server)
+    end
 end
 
 -- The goal of nvim-bqf is to make Neovim's quickfix window better.
@@ -61,38 +66,6 @@ end
 local todo_comments_ok, todo_comments = pcall(require, "todo-comments")
 if todo_comments_ok then
     todo_comments.setup()
-end
-
--- numToStr/Comment.nvim - comment
-local comment_ok, comment = pcall(require, "Comment")
-if comment_ok then
-    comment.setup {
-        pre_hook = function(ctx)
-            local U = require "Comment.utils"
-
-            local status_utils_ok, utils = pcall(require, "ts_context_commentstring.utils")
-            if not status_utils_ok then
-                return
-            end
-
-            local location = nil
-            if ctx.ctype == U.ctype.block then
-                location = utils.get_cursor_location()
-            elseif ctx.cmotion == U.cmotion.v or ctx.cmotion == U.cmotion.V then
-                location = utils.get_visual_start_location()
-            end
-
-            local status_internals_ok, internals = pcall(require, "ts_context_commentstring.internals")
-            if not status_internals_ok then
-                return
-            end
-
-            return internals.calculate_commentstring {
-                key = ctx.ctype == U.ctype.line and "__default" or "__multiline",
-                location = location,
-            }
-        end,
-    }
 end
 
 -- folke/flash.nvim - flash
@@ -432,7 +405,7 @@ end
 -- If lazy failed to install this plugin (e.g. weak network), do not trigger lazy loader errors.
 local copilot_plugin_path = vim.fn.stdpath("data") .. "/lazy/copilot.lua"
 local is_macos = vim.fn.has("macunix") == 1
-if is_macos and vim.loop.fs_stat(copilot_plugin_path) then
+if is_macos and vim.uv.fs_stat(copilot_plugin_path) then
     local copilot_ok, copilot = pcall(require, "copilot")
     if copilot_ok then
         local copilot_node = (vim.fn.executable("/opt/homebrew/bin/node") == 1) and "/opt/homebrew/bin/node" or "node"
@@ -554,11 +527,6 @@ end
 
 -- hrsh7th/cmp-nvim-lsp -- cmp-nvim-lsp
 local cmp_nvim_lsp_ok, cmp_nvim_lsp = pcall(require, "cmp_nvim_lsp")
-if cmp_nvim_lsp_ok then
-    cmp_nvim_lsp.setup({
-        capabilities = cmp_nvim_lsp.default_capabilities(),
-    })
-end
 
 
 -- neovim/nvim-lspconfig -- lspconfig
@@ -585,8 +553,164 @@ if has_new_lsp_api or lspconfig_ok then
         capabilities = cmp_nvim_lsp.default_capabilities(capabilities)
     end
 
+    local function lsp_supports_method(bufnr, method)
+        for _, client in ipairs(vim.lsp.get_clients({ bufnr = bufnr })) do
+            if client.name ~= "copilot" and type(client.supports_method) == "function" and client:supports_method(method, { bufnr = bufnr }) then
+                return true
+            end
+        end
+        return false
+    end
+
+    local function external_formatter_command(bufnr)
+        local filetype = vim.bo[bufnr].filetype
+        local filename = vim.api.nvim_buf_get_name(bufnr)
+        local stdin_name = filename ~= "" and filename or ("stdin." .. filetype)
+
+        if filetype == "lua" and vim.fn.executable("stylua") == 1 then
+            return { "stylua", "--stdin-filepath", stdin_name, "-" }
+        end
+
+        if filetype == "python" and vim.fn.executable("black") == 1 then
+            return { "black", "--fast", "--quiet", "-" }
+        end
+
+        local prettier_filetypes = {
+            javascript = true,
+            javascriptreact = true,
+            typescript = true,
+            typescriptreact = true,
+            json = true,
+            css = true,
+            scss = true,
+            less = true,
+            html = true,
+            markdown = true,
+            markdown_inline = true,
+            yaml = true,
+        }
+        if prettier_filetypes[filetype] and vim.fn.executable("prettier") == 1 then
+            return {
+                "prettier",
+                "--stdin-filepath",
+                stdin_name,
+                "--no-semi",
+                "--single-quote",
+                "--jsx-single-quote",
+            }
+        end
+    end
+
+    local function run_external_formatter(bufnr)
+        local cmd = external_formatter_command(bufnr)
+        if not cmd then
+            vim.notify("当前 buffer 没有可用的外部 formatter", vim.log.levels.WARN)
+            return
+        end
+
+        local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+        local input = table.concat(lines, "\n")
+        if vim.bo[bufnr].endofline then
+            input = input .. "\n"
+        end
+
+        local result = vim.system(cmd, { stdin = input, text = true }):wait()
+        if result.code ~= 0 then
+            local stderr = (result.stderr or ""):gsub("%s+$", "")
+            vim.notify(stderr ~= "" and stderr or ("formatter failed: " .. table.concat(cmd, " ")), vim.log.levels.ERROR)
+            return
+        end
+
+        local output = result.stdout or ""
+        local formatted = vim.split(output, "\n", { plain = true })
+        if #formatted > 0 and formatted[#formatted] == "" then
+            table.remove(formatted, #formatted)
+        end
+
+        local view = vim.fn.winsaveview()
+        vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, formatted)
+        vim.fn.winrestview(view)
+    end
+
+    local function format_buffer(bufnr)
+        bufnr = bufnr or vim.api.nvim_get_current_buf()
+        if lsp_supports_method(bufnr, "textDocument/formatting") then
+            vim.lsp.buf.format({
+                bufnr = bufnr,
+                async = true,
+                filter = function(client)
+                    return client.name ~= "copilot"
+                end,
+            })
+            return
+        end
+
+        run_external_formatter(bufnr)
+    end
+
+    local function setup_document_highlight(client, bufnr)
+        if not (type(client.supports_method) == "function" and client:supports_method("textDocument/documentHighlight", { bufnr = bufnr })) then
+            return
+        end
+
+        local group = vim.api.nvim_create_augroup("dotfiles_lsp_document_highlight_" .. bufnr, { clear = true })
+        vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
+            group = group,
+            buffer = bufnr,
+            callback = vim.lsp.buf.document_highlight,
+        })
+        vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI", "BufLeave" }, {
+            group = group,
+            buffer = bufnr,
+            callback = vim.lsp.buf.clear_references,
+        })
+    end
+
+    local function hover_documentation()
+        local bufnr = vim.api.nvim_get_current_buf()
+        local util = require("vim.lsp.util")
+
+        vim.lsp.buf_request_all(bufnr, "textDocument/hover", function(client)
+            return util.make_position_params(0, client.offset_encoding)
+        end, function(results, ctx)
+            if vim.api.nvim_get_current_buf() ~= bufnr then
+                return
+            end
+
+            local contents = {}
+            local has_result = false
+
+            for client_id, resp in pairs(results or {}) do
+                local result = resp and resp.result
+                if result and result.contents then
+                    has_result = true
+                    local client = vim.lsp.get_client_by_id(client_id)
+                    if client then
+                        contents[#contents + 1] = string.format("[%s]", client.name)
+                    end
+                    vim.list_extend(contents, util.convert_input_to_markdown_lines(result.contents))
+                    contents[#contents + 1] = ""
+                end
+            end
+
+            while #contents > 0 and contents[#contents] == "" do
+                table.remove(contents, #contents)
+            end
+
+            if not has_result or vim.tbl_isempty(contents) then
+                vim.notify("No information available", vim.log.levels.INFO)
+                return
+            end
+
+            util.open_floating_preview(contents, "plaintext", {
+                border = "rounded",
+                focus_id = "textDocument/hover",
+            })
+        end)
+    end
+
     local function lsp_keymaps(bufnr)
-        vim.api.nvim_buf_set_option(bufnr, "omnifunc", "v:lua.vim.lsp.omnifunc")
+        vim.bo[bufnr].omnifunc = "v:lua.vim.lsp.omnifunc"
 
         local function opts(desc)
             return { desc = "lsp: " .. desc, buffer = bufnr, noremap = true, silent = true, nowait = true }
@@ -594,11 +718,11 @@ if has_new_lsp_api or lspconfig_ok then
 
         vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts("Rename"))
         vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts("Code Action"))
-        -- vim.keymap.set("n", "<leader>=", function() vim.lsp.buf.format({ async = true }) end, opts("Format"))
+        vim.keymap.set("n", "<leader>=", function() format_buffer(bufnr) end, opts("Format"))
         vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts("Go to Definition"))
         vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opts("Go to Implementation"))
         vim.keymap.set("n", "gr", vim.lsp.buf.references, opts("References"))
-        vim.keymap.set("n", "K", vim.lsp.buf.hover, opts("Hover Documentation"))
+        vim.keymap.set("n", "K", hover_documentation, opts("Hover Documentation"))
     end
 
     -- Global fallback mappings so keys are always available.
@@ -608,10 +732,11 @@ if has_new_lsp_api or lspconfig_ok then
         end
         vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, gopts("Rename"))
         vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, gopts("Code Action"))
+        vim.keymap.set("n", "<leader>=", format_buffer, gopts("Format"))
         vim.keymap.set("n", "gd", vim.lsp.buf.definition, gopts("Go to Definition"))
         vim.keymap.set("n", "gi", vim.lsp.buf.implementation, gopts("Go to Implementation"))
         vim.keymap.set("n", "gr", vim.lsp.buf.references, gopts("References"))
-        vim.keymap.set("n", "K", vim.lsp.buf.hover, gopts("Hover Documentation"))
+        vim.keymap.set("n", "K", hover_documentation, gopts("Hover Documentation"))
     end
 
 
@@ -624,12 +749,12 @@ if has_new_lsp_api or lspconfig_ok then
             client.server_capabilities.documentFormattingProvider = false
         end
 
-        lsp_keymaps(bufnr)
-        local status_ok, illuminate = pcall(require, "illuminate")
-        if not status_ok then
-            return
+        if client.name == "gopls" then
+            client.server_capabilities.semanticTokensProvider = nil
         end
-        illuminate.on_attach(client)
+
+        lsp_keymaps(bufnr)
+        setup_document_highlight(client, bufnr)
     end
 
     local opts = {
@@ -639,7 +764,6 @@ if has_new_lsp_api or lspconfig_ok then
 
 
     for _, server in pairs(lspconfig_ensure_installed) do
-        server = vim.split(server, "@")[1]
         local server_opts = vim.deepcopy(opts)
 
         local require_ok, conf_opts = pcall(require, "langs." .. server)
@@ -679,15 +803,6 @@ if has_new_lsp_api or lspconfig_ok then
         },
     })
 
-
-    vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
-        border = "rounded",
-    })
-
-    vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
-        border = "rounded",
-    })
-
 end
 
 -- nvim-treesitter/nvim-treesitter - nvim_treesitter_configs
@@ -698,7 +813,7 @@ if treesitter_configs_ok then
         ignore_install = { "phpdoc" }, -- List of parsers to ignore installing
         highlight = {
             enable = true, -- false will disable the whole extension
-            disable = { "css" }, -- list of language that will be disabled
+            disable = { "css", "markdown", "markdown_inline" }, -- list of language that will be disabled
         },
         autopairs = {
             enable = true,
@@ -833,7 +948,6 @@ if project_nvim_ok then
         show_hidden = false,
         silent_chdir = true,
         scope_chdir = "win",
-        ignore_lsp = { "none-ls" },
         exclude_dirs = { "~/.cargo/*" },
         datapath = vim.fn.stdpath("data"),
     })
@@ -842,32 +956,6 @@ if project_nvim_ok then
         telescope.load_extension("projects")
     end
 
-end
-
--- jose-elias-alvarez/null-ls.nvim -- null-ls
-local null_ls_ok, null_ls = pcall(require, "none-ls")
-if null_ls_ok then
-
-    -- https://github.com/jose-elias-alvarez/null-ls.nvim/tree/main/lua/null-ls/builtins/formatting
-    local formatting = null_ls.builtins.formatting
-    -- https://github.com/jose-elias-alvarez/null-ls.nvim/tree/main/lua/null-ls/builtins/diagnostics
-    -- local diagnostics = null_ls.builtins.diagnostics
-
-    local sources = {}
-    if vim.fn.executable("prettier") == 1 then
-        table.insert(sources, formatting.prettier.with({ extra_args = { "--no-semi", "--single-quote", "--jsx-single-quote" } }))
-    end
-    if vim.fn.executable("black") == 1 then
-        table.insert(sources, formatting.black.with({ extra_args = { "--fast" } }))
-    end
-    if vim.fn.executable("stylua") == 1 then
-        table.insert(sources, formatting.stylua)
-    end
-
-    null_ls.setup({
-        debug = false,
-        sources = sources,
-    })
 end
 
 -- folke/which-key.nvim -- which-key
@@ -918,18 +1006,6 @@ if mason_ok then
             ensure_installed = mason_lsp_servers,
             automatic_installation = true,
         })
-    end
-
-    -- Best-effort install for non-LSP tools used by null-ls and dap.
-    local mason_registry_ok, mason_registry = pcall(require, "mason-registry")
-    if mason_registry_ok then
-        local extra_tools = { "prettier", "black", "stylua", "delve" }
-        for _, pkg_name in ipairs(extra_tools) do
-            local ok, pkg = pcall(mason_registry.get_package, pkg_name)
-            if ok and pkg and not pkg:is_installed() then
-                pkg:install()
-            end
-        end
     end
 end
 

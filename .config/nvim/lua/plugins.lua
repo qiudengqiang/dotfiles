@@ -1,6 +1,6 @@
 -- Automatically install lazy
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not vim.loop.fs_stat(lazypath) then
+if not vim.uv.fs_stat(lazypath) then
     vim.fn.system({
         "git",
         "clone",
@@ -15,7 +15,6 @@ vim.opt.rtp:prepend(lazypath)
 local is_macos = vim.fn.has("macunix") == 1
 
 require("lazy").setup({
-    { "numToStr/Comment.nvim" },
     { "kylechui/nvim-surround" },
     { "farmergreg/vim-lastplace" },
     { "stevearc/aerial.nvim" },
@@ -55,9 +54,6 @@ require("lazy").setup({
     { "neovim/nvim-lspconfig" }, -- enable LSP
     { "williamboman/mason.nvim" }, -- simple to use language server installer
     { "williamboman/mason-lspconfig.nvim" },
-    { "RRethy/vim-illuminate" },
-    { "nvimtools/none-ls.nvim", dependencies = { "nvim-lua/plenary.nvim" } },
-    { "fatih/vim-go" },
 
     -- lsp ui 增强
     { "nvimdev/lspsaga.nvim" },
