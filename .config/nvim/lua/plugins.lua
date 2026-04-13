@@ -38,19 +38,9 @@ require("lazy").setup({
     { "ahmedkhalf/project.nvim", dependencies = { "nvim-telescope/telescope.nvim" } },
     { "lukas-reineke/indent-blankline.nvim" },
 
-    -- Cmp
-    { "hrsh7th/nvim-cmp" },
-    { "hrsh7th/cmp-buffer" },
-    { "hrsh7th/cmp-path" },
-    { "saadparwaiz1/cmp_luasnip" },
-    { "L3MON4D3/LuaSnip" },
-    { "hrsh7th/cmp-nvim-lsp" },
-    { "zbirenbaum/copilot.lua", enabled = is_macos },
-
     -- LSP
     { "neovim/nvim-lspconfig" }, -- enable LSP
     { "williamboman/mason.nvim" }, -- simple to use language server installer
-    { "williamboman/mason-lspconfig.nvim" },
 
     -- lsp ui 增强
     { "folke/trouble.nvim", dependencies = "kyazdani42/nvim-web-devicons" },

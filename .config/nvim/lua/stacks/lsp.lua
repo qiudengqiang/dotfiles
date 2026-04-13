@@ -1,8 +1,6 @@
 local M = {}
 
 function M.setup(servers)
-    local cmp_nvim_lsp_ok, cmp_nvim_lsp = pcall(require, "cmp_nvim_lsp")
-
     if vim.lsp.buf_get_clients then
         vim.lsp.buf_get_clients = function(opts)
             if type(opts) == "number" then
@@ -14,13 +12,10 @@ function M.setup(servers)
 
     local capabilities = vim.lsp.protocol.make_client_capabilities()
     capabilities.textDocument.completion.completionItem.snippetSupport = true
-    if cmp_nvim_lsp_ok then
-        capabilities = cmp_nvim_lsp.default_capabilities(capabilities)
-    end
 
     local function lsp_supports_method(bufnr, method)
         for _, client in ipairs(vim.lsp.get_clients({ bufnr = bufnr })) do
-            if client.name ~= "copilot" and type(client.supports_method) == "function" and client:supports_method(method, { bufnr = bufnr }) then
+            if type(client.supports_method) == "function" and client:supports_method(method, { bufnr = bufnr }) then
                 return true
             end
         end
@@ -49,46 +44,9 @@ function M.setup(servers)
     end
 
     local function hover_documentation()
-        local bufnr = vim.api.nvim_get_current_buf()
-        local util = require("vim.lsp.util")
-
-        vim.lsp.buf_request_all(bufnr, "textDocument/hover", function(client)
-            return util.make_position_params(0, client.offset_encoding)
-        end, function(results, _)
-            if vim.api.nvim_get_current_buf() ~= bufnr then
-                return
-            end
-
-            local contents = {}
-            local has_result = false
-
-            for client_id, resp in pairs(results or {}) do
-                local result = resp and resp.result
-                if result and result.contents then
-                    has_result = true
-                    local client = vim.lsp.get_client_by_id(client_id)
-                    if client then
-                        contents[#contents + 1] = string.format("[%s]", client.name)
-                    end
-                    vim.list_extend(contents, util.convert_input_to_markdown_lines(result.contents))
-                    contents[#contents + 1] = ""
-                end
-            end
-
-            while #contents > 0 and contents[#contents] == "" do
-                table.remove(contents, #contents)
-            end
-
-            if not has_result or vim.tbl_isempty(contents) then
-                vim.notify("No information available", vim.log.levels.INFO)
-                return
-            end
-
-            util.open_floating_preview(contents, "plaintext", {
-                border = "rounded",
-                focus_id = "textDocument/hover",
-            })
-        end)
+        vim.lsp.buf.hover({
+            border = "rounded",
+        })
     end
 
     local function lsp_keymaps(bufnr)
@@ -98,6 +56,7 @@ function M.setup(servers)
             return { desc = "lsp: " .. desc, buffer = bufnr, noremap = true, silent = true, nowait = true }
         end
 
+        vim.keymap.set("i", "<C-l>", function() vim.lsp.completion.get() end, opts("Completion"))
         vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts("Rename"))
         vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts("Code Action"))
         vim.keymap.set("n", "<leader>=", function() format_buffer(bufnr) end, opts("Format"))
@@ -131,6 +90,10 @@ function M.setup(servers)
 
         if client.name == "gopls" then
             client.server_capabilities.semanticTokensProvider = nil
+        end
+
+        if type(client.supports_method) == "function" and client:supports_method("textDocument/completion", { bufnr = bufnr }) then
+            vim.lsp.completion.enable(true, client.id, bufnr, { autotrigger = true })
         end
 
         lsp_keymaps(bufnr)

@@ -107,7 +107,6 @@ keymap("n", "<leader>ff", "<cmd>Telescope find_files<cr>", opts("Find files"))
 keymap("n", "<leader>fg", "<cmd>Telescope live_grep<cr>", opts("Live grep"))
 keymap("n", "<leader>fb", "<cmd>Telescope buffers<cr>", opts("Buffers"))
 keymap("n", "<leader>fh", "<cmd>Telescope help_tags<cr>", opts("Help tags"))
-keymap("n", "<leader>fm", "<cmd>Telescope treesitter<cr>", opts("Find symbols in current file"))
 
 -- t: test
 keymap("n", "<leader>tt", "<cmd>lua require('neotest').run.run()<cr>", opts("Test"))

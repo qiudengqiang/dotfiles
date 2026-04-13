@@ -81,6 +81,29 @@ dotfile/
 - 如果该语言需要专属配置，就新增 [`.config/nvim/lua/langs`](/Users/didi/workspace/src/dotfiles/.config/nvim/lua/langs) 下对应的 `<server>.lua`
 - `configs.lua` 会自动执行 `require("langs." .. server)`，所以只要文件名和 server 名一致就会生效
 - 如果该语言还需要 formatter / treesitter / dap / test，再分别补到：
-  - [`.config/nvim/lua/format.lua`](/Users/didi/workspace/src/dotfiles/.config/nvim/lua/format.lua:1)
-  - [`.config/nvim/lua/configs.lua`](/Users/didi/workspace/src/dotfiles/.config/nvim/lua/configs.lua:725) 的 treesitter 配置
-  - 同文件里的 dap / neotest 相关配置
+  - [`.config/nvim/lua/stacks/format.lua`](/Users/didi/workspace/src/dotfiles/.config/nvim/lua/stacks/format.lua:1)
+  - [`.config/nvim/lua/stacks/treesitter.lua`](/Users/didi/workspace/src/dotfiles/.config/nvim/lua/stacks/treesitter.lua:1)
+  - [`.config/nvim/lua/stacks/tools.lua`](/Users/didi/workspace/src/dotfiles/.config/nvim/lua/stacks/tools.lua:1)
+  - [`.config/nvim/lua/stacks/editor.lua`](/Users/didi/workspace/src/dotfiles/.config/nvim/lua/stacks/editor.lua:1)
+
+## Neovim 目标结构
+- [`.config/nvim/lua/configs.lua`](/Users/didi/workspace/src/dotfiles/.config/nvim/lua/configs.lua:1)
+  只做总装配，负责拼出最终配置，不再承载大段具体实现
+- [`.config/nvim/lua/stacks/lsp.lua`](/Users/didi/workspace/src/dotfiles/.config/nvim/lua/stacks/lsp.lua:1)
+  原生 LSP 主链：`vim.lsp.config/enable`、diagnostic、hover、on_attach、LSP keymaps
+- [`.config/nvim/lua/langs`](/Users/didi/workspace/src/dotfiles/.config/nvim/lua/langs)
+  语言专属 LSP 配置，每个 server 一个文件
+- [`.config/nvim/lua/stacks/format.lua`](/Users/didi/workspace/src/dotfiles/.config/nvim/lua/stacks/format.lua:1)
+  格式化策略：LSP formatting 优先，外部 formatter 兜底
+- [`.config/nvim/lua/stacks/treesitter.lua`](/Users/didi/workspace/src/dotfiles/.config/nvim/lua/stacks/treesitter.lua:1)
+  原生 treesitter 运行时接线，以及 parser 安装管理
+- [`.config/nvim/lua/stacks/tools.lua`](/Users/didi/workspace/src/dotfiles/.config/nvim/lua/stacks/tools.lua:1)
+  安装和开发工具链：`mason`、`dap`、`dap-go`
+- [`.config/nvim/lua/stacks/editor.lua`](/Users/didi/workspace/src/dotfiles/.config/nvim/lua/stacks/editor.lua:1)
+  编辑体验增强：原生 completion/snippet、`autopairs`、`neotest`
+- [`.config/nvim/lua/stacks/ui.lua`](/Users/didi/workspace/src/dotfiles/.config/nvim/lua/stacks/ui.lua:1)
+  界面与导航：`telescope`、`which-key`、`trouble`、`nvim-tree`、`bufferline`、`lualine`
+
+## Neovim 快捷键
+
+- 速查文档见 [.config/nvim/README.md](/Users/didi/workspace/src/dotfiles/.config/nvim/README.md:1)

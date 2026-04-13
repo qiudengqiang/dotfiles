@@ -15,13 +15,22 @@ function M.setup(mason_lsp_servers)
                 max_concurrent_installers = 4,
             },
         })
-
-        local mason_lspconfig_ok, mason_lspconfig = pcall(require, "mason-lspconfig")
-        if mason_lspconfig_ok then
-            mason_lspconfig.setup({
-                ensure_installed = mason_lsp_servers,
-                automatic_installation = true,
-            })
+        local registry_ok, registry = pcall(require, "mason-registry")
+        if registry_ok then
+            local lsp_packages = {
+                bashls = "bash-language-server",
+                yamlls = "yaml-language-server",
+                lua_ls = "lua-language-server",
+            }
+            for _, server in ipairs(mason_lsp_servers) do
+                local package_name = lsp_packages[server]
+                if package_name then
+                    local package_ok, pkg = pcall(registry.get_package, package_name)
+                    if package_ok and not pkg:is_installed() then
+                        pkg:install()
+                    end
+                end
+            end
         end
     end
 

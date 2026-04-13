@@ -78,9 +78,6 @@ function M.new(lsp_supports_method)
                 vim.lsp.buf.format({
                     bufnr = bufnr,
                     async = true,
-                    filter = function(client)
-                        return client.name ~= "copilot"
-                    end,
                 })
                 return
             end

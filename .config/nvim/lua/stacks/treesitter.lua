@@ -1,23 +1,82 @@
 local M = {}
 
-function M.setup()
-    local treesitter_configs_ok, treesitter_configs = pcall(require, "nvim-treesitter.configs")
-    if not treesitter_configs_ok then
+local parser_languages = {
+    "bash",
+    "c",
+    "javascript",
+    "json",
+    "lua",
+    "python",
+    "typescript",
+    "tsx",
+    "css",
+    "rust",
+    "yaml",
+    "markdown",
+    "markdown_inline",
+    "go",
+}
+
+local disabled_languages = {
+    css = true,
+}
+
+local filetype_language_map = {
+    ["yaml.docker-compose"] = "yaml",
+    ["yaml.gitlab"] = "yaml",
+    ["yaml.helm-values"] = "yaml",
+}
+
+local function get_language(bufnr)
+    local filetype = vim.bo[bufnr].filetype
+    if filetype_language_map[filetype] then
+        return filetype_language_map[filetype]
+    end
+
+    return vim.treesitter.language.get_lang(filetype) or filetype
+end
+
+local function start_treesitter(bufnr)
+    if not vim.api.nvim_buf_is_valid(bufnr) then
         return
     end
 
-    treesitter_configs.setup({
-        ensure_installed = { "bash", "c", "javascript", "json", "lua", "python", "typescript", "tsx", "css", "rust", "yaml", "markdown", "markdown_inline", "go" },
-        ignore_install = { "phpdoc" },
-        highlight = {
-            enable = true,
-            disable = { "css", "markdown", "markdown_inline" },
-        },
-        autopairs = {
-            enable = true,
-        },
-        indent = { enable = true, disable = { "python", "css" } },
+    if vim.bo[bufnr].buftype ~= "" then
+        return
+    end
+
+    local lang = get_language(bufnr)
+    if not lang then
+        return
+    end
+
+    if disabled_languages[lang] then
+        pcall(vim.treesitter.stop, bufnr)
+        return
+    end
+
+    if not pcall(vim.treesitter.start, bufnr, lang) then
+        return
+    end
+end
+
+function M.setup()
+    local install_ok, install = pcall(require, "nvim-treesitter.install")
+    if install_ok then
+        install.ensure_installed(parser_languages)
+    end
+
+    local group = vim.api.nvim_create_augroup("dotfiles_treesitter_native", { clear = true })
+    vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile", "FileType" }, {
+        group = group,
+        callback = function(args)
+            start_treesitter(args.buf)
+        end,
     })
+
+    for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
+        start_treesitter(bufnr)
+    end
 end
 
 return M
