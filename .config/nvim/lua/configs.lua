@@ -18,6 +18,7 @@ end
 
 require("stacks.ui").setup()
 require("stacks.editor").setup()
+require("stacks.git").setup()
 require("stacks.lsp").setup(lspconfig_ensure_installed)
 require("stacks.treesitter").setup()
 require("stacks.tools").setup(mason_lsp_servers)

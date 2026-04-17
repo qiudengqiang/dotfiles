@@ -86,7 +86,8 @@ keymap("n", "<leader>cr", "<cmd>lua ReloadConfig()<cr>", opts("Reload config (nv
 
 -- g: git
 keymap("n", "<leader>gs", "<cmd>Git<cr>", opts("Git status"))
-keymap("n", "<leader>gb", "<cmd>Git blame<cr>", opts("Git blame"))
+keymap("n", "<leader>gb", "<cmd>Gitsigns blame_line<cr>", opts("Git blame line"))
+keymap("n", "<leader>gB", "<cmd>Git blame<cr>", opts("Git blame file"))
 keymap("n", "<leader>gd", ":Gvdiffsplit<CR>", opts("Git diff"))
 keymap("n", "<leader>gh", ":DiffviewFileHistory %<CR>", opts("Git file history"))
 keymap("n", "<leader>gH", ":DiffviewFileHistory<CR>", opts("Git branch history"))

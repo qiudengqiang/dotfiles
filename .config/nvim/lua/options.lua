@@ -39,12 +39,13 @@ vim.opt.scrolloff = 8                           -- minimal number of screen line
 vim.opt.sidescrolloff = 8                       -- minimal number of screen columns either side of cursor if wrap is `false`
 vim.opt.guifont = "monospace:h17"               -- the font used in graphical neovim applications
 vim.opt.whichwrap = "bs<>[]hl"                  -- which "horizontal" keys are allowed to travel to prev/next line
--- Avoid synchronous treesitter fold computation on every file open.
-vim.opt.foldmethod = "manual"
-vim.opt.foldexpr = "0"
-vim.opt.foldenable = false
-vim.opt.foldlevel  = 99
-vim.opt.foldcolumn = "0"
+-- Use Neovim's built-in treesitter foldexpr instead of the old vimscript foldexpr.
+vim.opt.foldmethod = "expr"
+vim.opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+vim.opt.foldenable = true
+vim.opt.foldlevel = 99
+vim.opt.foldlevelstart = 99
+vim.opt.foldcolumn = "1"
 
 -- vim.opt.shortmess = "ilmnrx"                 -- flags to shorten vim messages, see :help 'shortmess'
 vim.opt.shortmess:append "c"                           -- don't give |ins-completion-menu| messages
