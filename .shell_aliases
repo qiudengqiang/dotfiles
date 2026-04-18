@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+
+alias ll='ls -lha'
+alias vi='nvim'
+alias grep='grep --color'
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+alias p3s='python3 -m http.server'
+
+_proxy_backup_var() {
+  local name="$1"
+  local backup="__DOTFILES_PROXY_BACKUP_${name}"
+
+  eval "if [[ -n \${${backup}+x} ]]; then return; fi"
+  eval "export ${backup}=\"\${${name}-__DOTFILES_PROXY_UNSET__}\""
+}
+
+_proxy_restore_var() {
+  local name="$1"
+  local backup="__DOTFILES_PROXY_BACKUP_${name}"
+  local value
+
+  eval "value=\"\${${backup}-__DOTFILES_PROXY_UNSET__}\""
+  if [[ "$value" == "__DOTFILES_PROXY_UNSET__" ]]; then
+    unset "$name"
+  else
+    export "${name}=${value}"
+  fi
+  unset "$backup"
+}
+
+proxy_on() {
+  local http_proxy_url="http://127.0.0.1:7890"
+  local all_proxy_url="socks5://127.0.0.1:7891"
+  local no_proxy_default="localhost,127.0.0.1,::1"
+  local var
+
+  for var in http_proxy https_proxy all_proxy HTTP_PROXY HTTPS_PROXY ALL_PROXY no_proxy NO_PROXY; do
+    _proxy_backup_var "$var"
+  done
+
+  export http_proxy="$http_proxy_url"
+  export https_proxy="$http_proxy_url"
+  export all_proxy="$all_proxy_url"
+  export HTTP_PROXY="$http_proxy"
+  export HTTPS_PROXY="$https_proxy"
+  export ALL_PROXY="$all_proxy"
+  export no_proxy="${no_proxy:-${NO_PROXY:-$no_proxy_default}}"
+  export NO_PROXY="${NO_PROXY:-$no_proxy}"
+
+  echo "🟢 Proxy ON: $http_proxy"
+}
+
+proxy_off() {
+  local var
+
+  for var in http_proxy https_proxy all_proxy HTTP_PROXY HTTPS_PROXY ALL_PROXY no_proxy NO_PROXY; do
+    _proxy_restore_var "$var"
+  done
+
+  echo "🔴 Proxy OFF"
+}
+
+with_proxy() {
+  local http_proxy_url="http://127.0.0.1:7890"
+  local all_proxy_url="socks5://127.0.0.1:7891"
+  local no_proxy_value="${no_proxy:-${NO_PROXY:-localhost,127.0.0.1,::1}}"
+
+  if [[ $# -eq 0 ]]; then
+    echo "usage: with_proxy <command> [args...]" >&2
+    return 1
+  fi
+
+  http_proxy="$http_proxy_url" \
+  https_proxy="$http_proxy_url" \
+  all_proxy="$all_proxy_url" \
+  HTTP_PROXY="$http_proxy_url" \
+  HTTPS_PROXY="$http_proxy_url" \
+  ALL_PROXY="$all_proxy_url" \
+  no_proxy="$no_proxy_value" \
+  NO_PROXY="$no_proxy_value" \
+  "$@"
+}
+
+alias loginexp="exec ${HOME}/workspace/data/script/login.exp"

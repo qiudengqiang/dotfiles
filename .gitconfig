@@ -1,0 +1,20 @@
+[alias]
+	st = status
+	ss = status --short --branch
+	co = checkout
+	cm = commit -m 
+	br = branch
+	diff = df
+	sw = switch
+	sc = switch -c
+	rw = restore --worktree --
+	rs = restore --staged --
+	last = log -1 --stat
+	lg = log --graph --decorate --oneline --all
+	aliases = config --get-regexp '^alias\\.'
+
+[url "git@git.xiaojukeji.com:"]
+	insteadof = https://git.xiaojukeji.com
+
+[safe]
+	directory = *

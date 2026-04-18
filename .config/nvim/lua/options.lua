@@ -54,23 +54,48 @@ vim.opt.formatoptions:remove({ "c", "r", "o" })        -- don't insert the curre
 vim.opt.runtimepath:remove("/usr/share/vim/vimfiles")  -- separate vim plugins from neovim in case vim still in use
 vim.opt.termguicolors = true                    -- enable 24-bit RGB color in the TUI
 
+vim.filetype.add({
+    filename = {
+        ["go.mod"] = "gomod",
+    },
+    extension = {
+        go = "go",
+        txt = "text",
+        jsonnet = "jsonnet",
+        ts = "typescript",
+        tsx = "typescript",
+        js = "javascript",
+        jsx = "javascript",
+        yaml = "yaml",
+        yml = "yaml",
+        wxml = "html",
+        vue = "html",
+        wxs = "css",
+        css = "css",
+        less = "css",
+    },
+})
 
-vim.cmd([[
-    au BufRead,BufNewFile go.mod             setfiletype gomod
-    au BufRead,BufNewFile *.go               setfiletype go
-    au BufRead,BufNewFile *.txt              setfiletype text
-    au BufRead,BufNewFile *.jsonnet          setfiletype jsonnet
-    au BufRead,BufNewFile *.ts,*.tsx         setfiletype typescript
-    au BufRead,BufNewFile *.js,*.jsx         setfiletype javascript
-    au BufRead,BufNewFile *.yaml,*.yml       setfiletype yaml
-    au BufRead,BufNewFile *.wxml,*.vue       setfiletype html
-    au BufRead,BufNewFile *.wxs,*.css,*.less setfiletype css
+local indent_group = vim.api.nvim_create_augroup("dotfiles_indent", { clear = true })
 
-    au FileType html       setlocal et sta sw=4 sts=4
-    au FileType css        setlocal et sta sw=2 sts=2
-    au FileType json       setlocal et sta sw=4 sts=4
-    au FileType javascript setlocal et sta sw=2 sts=2
-    au FileType typescript setlocal et sta sw=2 sts=2
-    au FileType yaml       setlocal et sta sw=2 sts=2
-    au FileType xml        setlocal et sta sw=4 sts=4
-]])
+vim.api.nvim_create_autocmd("FileType", {
+    group = indent_group,
+    pattern = { "html", "json", "xml" },
+    callback = function(args)
+        vim.bo[args.buf].expandtab = true
+        vim.bo[args.buf].smarttab = true
+        vim.bo[args.buf].shiftwidth = 4
+        vim.bo[args.buf].softtabstop = 4
+    end,
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+    group = indent_group,
+    pattern = { "css", "javascript", "typescript", "yaml" },
+    callback = function(args)
+        vim.bo[args.buf].expandtab = true
+        vim.bo[args.buf].smarttab = true
+        vim.bo[args.buf].shiftwidth = 2
+        vim.bo[args.buf].softtabstop = 2
+    end,
+})

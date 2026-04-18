@@ -1,11 +1,6 @@
 local M = {}
 
 function M.setup()
-    local bqf_ok, bqf = pcall(require, "bqf")
-    if bqf_ok then
-        bqf.setup({})
-    end
-
     local trouble_ok, trouble = pcall(require, "trouble")
     if trouble_ok then
         trouble.setup({
@@ -42,11 +37,6 @@ function M.setup()
                 show_end = false,
             },
         })
-    end
-
-    local todo_comments_ok, todo_comments = pcall(require, "todo-comments")
-    if todo_comments_ok then
-        todo_comments.setup()
     end
 
     local flash_ok, flash = pcall(require, "flash")
@@ -224,19 +214,6 @@ function M.setup()
         })
     end
 
-    local aerial_ok, aerial = pcall(require, "aerial")
-    if aerial_ok then
-        aerial.setup({
-            backends = { "lsp", "treesitter", "markdown", "asciidoc", "man" },
-            layout = {
-                default_direction = "prefer_right",
-            },
-            show_guides = false,
-            open_automatic = false,
-            attach_mode = "global",
-        })
-    end
-
     local lualine_ok, lualine = pcall(require, "lualine")
     if lualine_ok then
         local filetype = { "filetype", icons_enabled = false, icon = nil }
@@ -359,26 +336,6 @@ function M.setup()
             pickers = {},
             extensions = {},
         })
-    end
-
-    local project_nvim_ok, project_nvim = pcall(require, "project_nvim")
-    if project_nvim_ok then
-        project_nvim.setup({
-            active = true,
-            on_config_done = nil,
-            manual_mode = false,
-            detection_methods = { "pattern", "lsp" },
-            patterns = { ".git", "package.json", "Makefile" },
-            show_hidden = false,
-            silent_chdir = true,
-            scope_chdir = "win",
-            exclude_dirs = { "~/.cargo/*" },
-            datapath = vim.fn.stdpath("data"),
-        })
-
-        if telescope_ok then
-            telescope.load_extension("projects")
-        end
     end
 
     local which_key_ok, which_key = pcall(require, "which-key")

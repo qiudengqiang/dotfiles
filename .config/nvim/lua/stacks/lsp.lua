@@ -1,15 +1,6 @@
 local M = {}
 
 function M.setup(servers)
-    if vim.lsp.buf_get_clients then
-        vim.lsp.buf_get_clients = function(opts)
-            if type(opts) == "number" then
-                opts = { bufnr = opts }
-            end
-            return vim.lsp.get_clients(opts or {})
-        end
-    end
-
     local capabilities = vim.lsp.protocol.make_client_capabilities()
     capabilities.textDocument.completion.completionItem.snippetSupport = true
 
@@ -43,13 +34,24 @@ function M.setup(servers)
         })
     end
 
+    local function setup_lsp_folding(client, bufnr)
+        if not (type(client.supports_method) == "function" and client:supports_method("textDocument/foldingRange", { bufnr = bufnr })) then
+            return
+        end
+
+        local winid = vim.api.nvim_get_current_win()
+        if vim.api.nvim_win_get_buf(winid) == bufnr then
+            vim.wo[winid][0].foldexpr = "v:lua.vim.lsp.foldexpr()"
+        end
+    end
+
     local function hover_documentation()
         vim.lsp.buf.hover({
             border = "rounded",
         })
     end
 
-    local function lsp_keymaps(bufnr)
+    local function setup_buffer_lsp_state(bufnr)
         vim.bo[bufnr].omnifunc = "v:lua.vim.lsp.omnifunc"
 
         local function opts(desc)
@@ -57,13 +59,6 @@ function M.setup(servers)
         end
 
         vim.keymap.set("i", "<C-l>", function() vim.lsp.completion.get() end, opts("Completion"))
-        vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts("Rename"))
-        vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts("Code Action"))
-        vim.keymap.set("n", "<leader>=", function() format_buffer(bufnr) end, opts("Format"))
-        vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts("Go to Definition"))
-        vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opts("Go to Implementation"))
-        vim.keymap.set("n", "gr", vim.lsp.buf.references, opts("References"))
-        vim.keymap.set("n", "K", hover_documentation, opts("Hover Documentation"))
     end
 
     do
@@ -96,8 +91,9 @@ function M.setup(servers)
             vim.lsp.completion.enable(true, client.id, bufnr, { autotrigger = true })
         end
 
-        lsp_keymaps(bufnr)
+        setup_buffer_lsp_state(bufnr)
         setup_document_highlight(client, bufnr)
+        setup_lsp_folding(client, bufnr)
     end
 
     local opts = {

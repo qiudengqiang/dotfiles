@@ -9,9 +9,28 @@ local keymap = vim.keymap.set
 vim.g.mapleader = " "      -- set leader to space
 vim.g.maplocalleader = " " -- set local leader to space
 
--- Custom
-function _G.ReloadConfig()
-    require("plenary.reload").reload_module("user")
+local function reload_config()
+    local reloadable_prefixes = { "stacks.", "langs." }
+    local reloadable_modules = {
+        options = true,
+        keymaps = true,
+        configs = true,
+        autocommands = true,
+    }
+
+    for name, _ in pairs(package.loaded) do
+        if reloadable_modules[name] then
+            package.loaded[name] = nil
+        else
+            for _, prefix in ipairs(reloadable_prefixes) do
+                if vim.startswith(name, prefix) then
+                    package.loaded[name] = nil
+                    break
+                end
+            end
+        end
+    end
+
     dofile(vim.env.MYVIMRC)
 end
 
@@ -48,6 +67,12 @@ keymap("n", "<C-Down>", "<cmd>resize +2<cr>", opts("resize down"))
 keymap("n", "<C-Left>", "<cmd>vertical resize -2<cr>", opts("resize left"))
 keymap("n", "<C-Right>", "<cmd>vertical resize +2<cr>", opts("resize right"))
 
+-- Window navigation
+keymap("n", "<leader>h", "<C-w>h", opts("window left"))
+keymap("n", "<leader>j", "<C-w>j", opts("window down"))
+keymap("n", "<leader>k", "<C-w>k", opts("window up"))
+keymap("n", "<leader>l", "<C-w>l", opts("window right"))
+
 -- Move text up and down
 keymap("n", "<A-j>", "<esc>:m .+1<cr>==gi", opts("move down"))
 keymap("n", "<A-k>", "<esc>:m .-2<cr>==gi", opts("move up"))
@@ -81,13 +106,13 @@ keymap({ "n", "x", "o" }, "<leader>S", function() require("flash").treesitter() 
 
 -- c: code/config/git
 keymap("n", "<leader>cx", "<cmd>Trouble diagnostics toggle<cr>", opts("Diagnostics (Trouble)"))
-keymap("n", "<leader>cb", ":<C-u>call gitblame#echo()<cr>", opts("Git blame"))
-keymap("n", "<leader>cr", "<cmd>lua ReloadConfig()<cr>", opts("Reload config (nvim)"))
+keymap("n", "<leader>cb", "<cmd>Gitsigns toggle_current_line_blame<cr>", opts("Toggle Git line blame"))
+keymap("n", "<leader>cr", reload_config, opts("Reload config (nvim)"))
 
 -- g: git
 keymap("n", "<leader>gs", "<cmd>Git<cr>", opts("Git status"))
 keymap("n", "<leader>gb", "<cmd>Gitsigns blame_line<cr>", opts("Git blame line"))
-keymap("n", "<leader>gB", "<cmd>Git blame<cr>", opts("Git blame file"))
+keymap("n", "<leader>gB", function() require("stacks.git").open_git_blame() end, opts("Git blame file"))
 keymap("n", "<leader>gd", ":Gvdiffsplit<CR>", opts("Git diff"))
 keymap("n", "<leader>gh", ":DiffviewFileHistory %<CR>", opts("Git file history"))
 keymap("n", "<leader>gH", ":DiffviewFileHistory<CR>", opts("Git branch history"))
@@ -102,8 +127,6 @@ keymap("n", "<leader>gv", function()
 end, opts("Toggle Diffview"))
 
 -- f: file/find
-keymap("n", "<leader>fp", "<cmd>Telescope projects<cr>", opts("Find projects"))
-keymap("n", "<leader>pp", "<cmd>ProjectRoot<cr>", opts("Project root"))
 keymap("n", "<leader>ff", "<cmd>Telescope find_files<cr>", opts("Find files"))
 keymap("n", "<leader>fg", "<cmd>Telescope live_grep<cr>", opts("Live grep"))
 keymap("n", "<leader>fb", "<cmd>Telescope buffers<cr>", opts("Buffers"))

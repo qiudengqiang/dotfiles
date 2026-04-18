@@ -13,6 +13,22 @@ local function external_formatter_command(bufnr)
         return { "black", "--fast", "--quiet", "-" }
     end
 
+    local clang_format_filetypes = {
+        c = true,
+        cpp = true,
+        objc = true,
+        objcpp = true,
+        cuda = true,
+    }
+    if clang_format_filetypes[filetype] then
+        if vim.fn.executable("clang-format") == 1 then
+            return { "clang-format", "--assume-filename", stdin_name }
+        end
+        if vim.fn.executable("xcrun") == 1 then
+            return { "xcrun", "clang-format", "--assume-filename", stdin_name }
+        end
+    end
+
     local prettier_filetypes = {
         javascript = true,
         javascriptreact = true,

@@ -7,6 +7,14 @@ HOME_DIR="${HOME:-/root}"
 info() { printf "\033[1;34m[INFO]\033[0m %s\n" "$*"; }
 warn() { printf "\033[1;33m[WARN]\033[0m %s\n" "$*"; }
 
+ensure_fd_compat() {
+  if command -v fdfind >/dev/null 2>&1 && ! command -v fd >/dev/null 2>&1; then
+    mkdir -p "${HOME_DIR}/.local/bin"
+    ln -sf "$(command -v fdfind)" "${HOME_DIR}/.local/bin/fd"
+    info "linked: ${HOME_DIR}/.local/bin/fd -> $(command -v fdfind)"
+  fi
+}
+
 link_item() {
   local rel="$1"
   local src="$DOTFILES_DIR/$rel"
@@ -38,6 +46,10 @@ link_item() {
 }
 
 bootstrap_shell_only() {
+  ensure_fd_compat
+  link_item ".shell_env"
+  link_item ".shell_aliases"
+  link_item ".gitconfig"
   link_item ".bash_profile"
   link_item ".bashrc"
   link_item ".config/nvim"

@@ -175,6 +175,7 @@ check_copilot_hint() {
 check_external_tools_optional() {
   check_cmd_optional prettier
   check_cmd_optional black
+  check_cmd_optional clang-format
   check_cmd_optional stylua
   check_cmd_optional dlv
 }
@@ -204,6 +205,9 @@ main() {
   echo
 
   echo "[1/${total_checks}] 关键软链接"
+  check_link_or_file ".shell_env"
+  check_link_or_file ".shell_aliases"
+  check_link_or_file ".gitconfig"
   check_link_or_file ".bash_profile"
   check_link_or_file ".bashrc"
   check_link_or_file ".zshrc"

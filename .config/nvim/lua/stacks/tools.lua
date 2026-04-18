@@ -1,6 +1,6 @@
 local M = {}
 
-function M.setup(mason_lsp_servers)
+function M.setup()
     local mason_ok, mason = pcall(require, "mason")
     if mason_ok then
         mason.setup({
@@ -15,23 +15,6 @@ function M.setup(mason_lsp_servers)
                 max_concurrent_installers = 4,
             },
         })
-        local registry_ok, registry = pcall(require, "mason-registry")
-        if registry_ok then
-            local lsp_packages = {
-                bashls = "bash-language-server",
-                yamlls = "yaml-language-server",
-                lua_ls = "lua-language-server",
-            }
-            for _, server in ipairs(mason_lsp_servers) do
-                local package_name = lsp_packages[server]
-                if package_name then
-                    local package_ok, pkg = pcall(registry.get_package, package_name)
-                    if package_ok and not pkg:is_installed() then
-                        pkg:install()
-                    end
-                end
-            end
-        end
     end
 
     local dap_ok, dap = pcall(require, "dap")
@@ -107,20 +90,11 @@ function M.setup(mason_lsp_servers)
             end
             return variable.name .. " = " .. variable.value:gsub("%s+", " ")
         end,
-        virt_text_pos = vim.fn.has("nvim-0.10") == 1 and "inline" or "eol",
+        virt_text_pos = "inline",
         all_frames = false,
         virt_lines = false,
         virt_text_win_col = 80,
     })
-
-    dap.adapters.go = {
-        type = "server",
-        port = "${port}",
-        executable = {
-            command = "dlv",
-            args = { "dap", "-l", "127.0.0.1:${port}" },
-        },
-    }
 
     dapgo.setup({
         dap_configurations = {

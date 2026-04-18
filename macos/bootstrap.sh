@@ -47,9 +47,9 @@ print_plan() {
   info "[dry-run] 2) Ensure Homebrew"
   info "[dry-run] 3) Install Brewfile packages"
   info "[dry-run] 4) Install MesloLGL Nerd Font from repo assets (fallback to brew only if missing)"
-  info "[dry-run] 5) Ensure external tools: prettier/black/stylua/dlv"
+  info "[dry-run] 5) Ensure external tools: prettier/black/clang-format/stylua/dlv"
   info "[dry-run] 6) Ensure Oh My Zsh + plugins"
-  for target in ".bash_profile" ".bashrc" ".zshrc" ".wezterm.lua" ".config/nvim"; do
+  for target in ".shell_env" ".shell_aliases" ".gitconfig" ".bash_profile" ".bashrc" ".zshrc" ".wezterm.lua" ".config/nvim"; do
     local src="$REPO_DIR/$target"
     local dst="$HOME/$target"
     if [[ -L "$dst" && "$(readlink "$dst")" == "$src" ]]; then
@@ -186,6 +186,7 @@ ensure_nerd_font() {
 ensure_external_tools() {
   local tools=(
     "prettier:prettier"
+    "clang-format:clang-format"
     "stylua:stylua"
     "dlv:delve"
   )
@@ -234,7 +235,7 @@ ensure_external_tools() {
 }
 
 print_external_tools_status() {
-  local tools=(prettier black stylua dlv)
+  local tools=(prettier black clang-format stylua dlv)
 
   info "External tools status:"
   for cmd in "${tools[@]}"; do
@@ -336,6 +337,9 @@ main() {
   ensure_oh_my_zsh
   ensure_omz_plugins
 
+  link_item ".shell_env"
+  link_item ".shell_aliases"
+  link_item ".gitconfig"
   link_item ".bash_profile"
   link_item ".bashrc"
   link_item ".zshrc"

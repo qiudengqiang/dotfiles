@@ -1,21 +1,6 @@
 local M = {}
 
-local parser_languages = {
-    "bash",
-    "c",
-    "javascript",
-    "json",
-    "lua",
-    "python",
-    "typescript",
-    "tsx",
-    "css",
-    "rust",
-    "yaml",
-    "markdown",
-    "markdown_inline",
-    "go",
-}
+local parser_install_dir = vim.fn.stdpath("data") .. "/site/parser"
 
 local disabled_languages = {
     css = true,
@@ -61,9 +46,13 @@ local function start_treesitter(bufnr)
 end
 
 function M.setup()
-    local install_ok, install = pcall(require, "nvim-treesitter.install")
-    if install_ok then
-        install.ensure_installed(parser_languages)
+    vim.opt.runtimepath:prepend(parser_install_dir)
+
+    local configs_ok, configs = pcall(require, "nvim-treesitter.configs")
+    if configs_ok then
+        configs.setup({
+            parser_install_dir = parser_install_dir,
+        })
     end
 
     local group = vim.api.nvim_create_augroup("dotfiles_treesitter_native", { clear = true })

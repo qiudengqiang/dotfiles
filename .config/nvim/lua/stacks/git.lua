@@ -7,6 +7,15 @@ function M.setup()
     end
 end
 
+function M.open_git_blame()
+    vim.cmd("Git blame")
+    vim.schedule(function()
+        if vim.bo.filetype == "fugitiveblame" then
+            M.align_fugitive_blame(vim.api.nvim_get_current_buf())
+        end
+    end)
+end
+
 local ignored_filetypes = {
     NvimTree = true,
     fugitive = true,

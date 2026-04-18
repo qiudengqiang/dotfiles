@@ -1,23 +1,25 @@
 -- Automatically install lazy
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.uv.fs_stat(lazypath) then
-    vim.fn.system({
+    local result = vim.system({
         "git",
         "clone",
         "--filter=blob:none",
         "https://github.com/folke/lazy.nvim.git",
         "--branch=stable",
         lazypath,
-    })
+    }, { text = true }):wait()
+
+    if result.code ~= 0 then
+        error("Failed to bootstrap lazy.nvim:\n" .. (result.stderr or ""))
+    end
 end
 
 vim.opt.rtp:prepend(lazypath)
-local is_macos = vim.fn.has("macunix") == 1
 
 require("lazy").setup({
     { "kylechui/nvim-surround" },
     { "farmergreg/vim-lastplace" },
-    { "stevearc/aerial.nvim" },
     { "windwp/nvim-autopairs" },
     { "akinsho/bufferline.nvim" },
     { "nvim-lualine/lualine.nvim" },
@@ -36,7 +38,6 @@ require("lazy").setup({
     },
     { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
     { "nvim-tree/nvim-tree.lua", dependencies = { "nvim-tree/nvim-web-devicons" } },
-    { "ahmedkhalf/project.nvim", dependencies = { "nvim-telescope/telescope.nvim" } },
     { "lukas-reineke/indent-blankline.nvim" },
 
     -- LSP
@@ -59,18 +60,13 @@ require("lazy").setup({
         },
     },
 
-    -- quickfix
-    { "kevinhwang91/nvim-bqf", ft = "qf" },
-
     -- find/search
     { "folke/flash.nvim", event = "BufEnter" },
     { "folke/which-key.nvim", dependencies = { "echasnovski/mini.nvim" }, event = "BufEnter" },
-    { "folke/todo-comments.nvim", dependencies = { "nvim-lua/plenary.nvim" } },
 
     -- debug, test
     { "mfussenegger/nvim-dap" },
-    { "rcarriga/nvim-dap-ui" },
+    { "rcarriga/nvim-dap-ui", dependencies = { "nvim-neotest/nvim-nio" } },
     { "leoluz/nvim-dap-go" },
     { "theHamsta/nvim-dap-virtual-text" },
-    { "nvim-telescope/telescope-dap.nvim" },
 })

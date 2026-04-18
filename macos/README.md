@@ -2,6 +2,9 @@
 
 ## 目标
 一条命令恢复：
+- `~/.shell_env`
+- `~/.shell_aliases`
+- `~/.gitconfig`
 - `~/.bash_profile`
 - `~/.bashrc`
 - `~/.zshrc`
@@ -34,9 +37,12 @@ make macos-bootstrap-dry-run
 2. 检查并安装 Homebrew
 3. `brew bundle --file macos/Brewfile` 安装工具
 4. 从仓库内置的 `assets/fonts/` 安装 `MesloLGL Nerd Font`（缺失时才回退到 `brew install --cask font-meslo-lg-nerd-font`）
-5. 检查并补齐 Neovim 外部工具（`prettier`/`stylua`/`delve`，`black` 走 `pipx/pip` 回退安装）
+5. 检查并补齐 Neovim 外部工具（`prettier`/`clang-format`/`stylua`/`delve`，`black` 走 `pipx/pip` 回退安装）
 6. 备份已有配置到 `~/.dotfiles_bak/<时间戳>/`
 7. 建立软链接：
+   - `~/.shell_env -> <repo>/.shell_env`
+   - `~/.shell_aliases -> <repo>/.shell_aliases`
+   - `~/.gitconfig -> <repo>/.gitconfig`
    - `~/.bash_profile -> <repo>/.bash_profile`
    - `~/.bashrc -> <repo>/.bashrc`
    - `~/.zshrc -> <repo>/.zshrc`

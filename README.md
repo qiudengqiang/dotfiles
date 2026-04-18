@@ -72,8 +72,30 @@ dotfile/
 ├── linux/                    # Linux 点文件同步脚本
 ├── docker/                   # Docker 相关脚本与文档
 ├── docker-compose.yml
-└── .bash_profile/.bashrc/.wezterm.lua/.config（可选 .zshrc）
+└── .shell_env/.shell_aliases/.gitconfig/.bash_profile/.bashrc/.wezterm.lua/.config（可选 .zshrc）
 ```
+
+## Shell 结构
+- `.shell_env`：bash/zsh 共享环境，放 PATH、`JAVA_HOME`、`GOPATH`、JetBrains hook
+- `.shell_aliases`：bash/zsh 共享 alias
+- `.gitconfig`：Git 全局配置，统一管理 alias、URL rewrite、safe.directory
+- `.bash_profile`：bash login shell 入口，负责加载共享环境、共享 alias、本地覆盖和 `.bashrc`
+- `.bashrc`：bash 交互配置
+- `.zshrc`：zsh 交互配置，直接加载共享环境和共享 alias，不再依赖 `.bash_profile`
+
+## Git Alias
+- `git st`：`git status`
+- `git ss`：紧凑视图查看状态和当前分支，等价于 `git status --short --branch`
+- `git co`：`git checkout`
+- `git sw <branch>`：切换分支，等价于 `git switch <branch>`
+- `git sc <branch>`：创建并切换到新分支，等价于 `git switch -c <branch>`
+- `git cm`：`git commit`
+- `git br`：`git branch`
+- `git rw <file>`：撤销工作区改动，等价于 `git restore --worktree -- <file>`
+- `git rs <file>`：取消暂存但保留文件改动，等价于 `git restore --staged -- <file>`
+- `git last`：查看最近一次提交及改动摘要，等价于 `git log -1 --stat`
+- `git lg`：图形化单行历史，等价于 `git log --graph --decorate --oneline --all`
+- `git aliases`：列出当前 alias
 
 ## Neovim 增加一种语言支持
 - LSP server 列表在 [`.config/nvim/lua/configs.lua`](/Users/didi/workspace/src/dotfiles/.config/nvim/lua/configs.lua:1) 的 `lspconfig_ensure_installed`
@@ -85,6 +107,9 @@ dotfile/
   - [`.config/nvim/lua/stacks/treesitter.lua`](/Users/didi/workspace/src/dotfiles/.config/nvim/lua/stacks/treesitter.lua:1)
   - [`.config/nvim/lua/stacks/tools.lua`](/Users/didi/workspace/src/dotfiles/.config/nvim/lua/stacks/tools.lua:1)
   - [`.config/nvim/lua/stacks/editor.lua`](/Users/didi/workspace/src/dotfiles/.config/nvim/lua/stacks/editor.lua:1)
+- 例如当前已经接入的 `clangd`：
+  - LSP 走 `clangd`
+  - 格式化优先走 LSP；如果没有 formatting capability 且系统里装了 `clang-format`，则回退到 `clang-format`
 
 ## Neovim 目标结构
 - [`.config/nvim/lua/configs.lua`](/Users/didi/workspace/src/dotfiles/.config/nvim/lua/configs.lua:1)

@@ -19,6 +19,21 @@
 - [lua/stacks/ui.lua](/Users/didi/workspace/src/dotfiles/.config/nvim/lua/stacks/ui.lua:1)
   界面与导航：`telescope`、`which-key`、`trouble`、`nvim-tree`、`bufferline`、`lualine`
 
+## 维护与演进原则
+
+- 优先维护 `0.12` 主链：
+  `vim.lsp.config/enable`、原生 completion/snippet、原生 Treesitter 运行时、原生 filetype/autocmd API。
+- 优先删除桥接层和运行时副作用：
+  例如旧的 LSP/completion/snippet 桥接、启动时自动安装语言服务或 parser 的逻辑。
+- 不要为了“更原生”而重写成熟插件：
+  如果插件不阻碍 `0.12` 主链演进，并且在承担稳定的小功能或复杂 UI，就保留插件实现。
+- 插件相关修正要尽量收敛到显式入口：
+  能只在某个 keymap 或命令里触发，就不要做成全局自动命令。
+- 优先减层，不优先重构：
+  能删无入口、无价值、重复层，就不要为了目录更漂亮再做额外抽象。
+- 保持文档与行为一致：
+  任何用户可感知的快捷键、工作流或语义变化，都应同步更新本文件。
+
 ## 快捷键
 
 基于当前仓库配置整理，面向日常使用，不展开实现细节。
@@ -107,8 +122,6 @@
 | 普通 | `Leader fg` | `Telescope live_grep` |
 | 普通 | `Leader fb` | `Telescope buffers` |
 | 普通 | `Leader fh` | `Telescope help_tags` |
-| 普通 | `Leader fp` | `Telescope projects` |
-| 普通 | `Leader pp` | 切到项目根目录 |
 
 ### LSP 与代码操作
 
@@ -127,12 +140,13 @@
 | 模式 | 快捷键 | 作用 |
 | --- | --- | --- |
 | 普通 | `Leader gs` | `:Git` 状态页 |
-| 普通 | `Leader gb` | `:Git blame` |
+| 普通 | `Leader gb` | 当前行 blame（`Gitsigns blame_line`） |
+| 普通 | `Leader gB` | 当前文件 blame（`Git blame`） |
 | 普通 | `Leader gd` | `:Gvdiffsplit` |
 | 普通 | `Leader gh` | 当前文件历史 |
 | 普通 | `Leader gH` | 仓库历史 |
 | 普通 | `Leader gv` | 切换 Diffview |
-| 普通 | `Leader cb` | gitblame 当前行 |
+| 普通 | `Leader cb` | 切换当前行常驻 blame |
 
 ### 诊断、配置与工具
 
@@ -234,35 +248,6 @@
 | `Ctrl-U` / `Ctrl-D` | 预览窗口滚动 |
 | `PageUp` / `PageDown` | 结果列表翻页 |
 | `?` | 显示帮助 |
-
-### Telescope Projects 局部快捷键
-
-`Leader fp` 打开的是 `Telescope projects`，默认选中项目后会：
-
-1. 把当前窗口的工作目录切到该项目
-2. 继续打开这个项目下的 `find_files`
-
-#### 普通模式
-
-| 快捷键 | 作用 |
-| --- | --- |
-| `Enter` | 切到项目并打开 `find_files` |
-| `f` | 切到项目并打开 `find_files` |
-| `w` | 只切换当前窗口 cwd 到该项目 |
-| `s` | 切到项目并打开 `live_grep` |
-| `r` | 切到项目并打开项目内 `oldfiles` |
-| `d` | 从最近项目列表删除该项目 |
-
-#### 插入模式
-
-| 快捷键 | 作用 |
-| --- | --- |
-| `Enter` | 切到项目并打开 `find_files` |
-| `Ctrl-F` | 切到项目并打开 `find_files` |
-| `Ctrl-W` | 只切换当前窗口 cwd 到该项目 |
-| `Ctrl-S` | 切到项目并打开 `live_grep` |
-| `Ctrl-R` | 切到项目并打开项目内 `oldfiles` |
-| `Ctrl-D` | 从最近项目列表删除该项目 |
 
 ### NvimTree 局部快捷键
 
