@@ -1,16 +1,16 @@
-# dotfile
+# dotfiles
 
 ## 快速开始（宿主机）
 ```bash
-git clone <你的仓库地址> ~/workspace/github/dotfile
-cd ~/workspace/github/dotfile
+git clone <你的仓库地址> ~/any/path/dotfiles
+cd ~/any/path/dotfiles
 make macos-bootstrap
 make macos-doctor
 ```
 
 ## 快速开始（容器，单镜像方式）
 ```bash
-cd ~/workspace/github/dotfile
+cd ~/any/path/dotfiles
 make build-image-amd64   # 构建本地 amd64 镜像（用于 x86 机器）
 make build-image-arm64   # 构建本地 arm64 镜像（用于 ARM 机器）
 # 如 Docker Hub 网络不稳，可切换基础镜像源：
@@ -31,6 +31,8 @@ make shell         # 进入已启动容器（bash）
 make clean
 ```
 目录映射调整说明见 [docker/README.md](./docker/README.md) 的“本地目录变动怎么改”。
+
+仓库路径不要求固定；只要在仓库根目录执行这些命令即可。
 
 ## 常用命令
 ```bash
@@ -66,7 +68,7 @@ make clean
 
 ## 目录结构
 ```text
-dotfile/
+dotfiles/
 ├── Makefile
 ├── macos/                    # macOS 脚本与文档
 ├── linux/                    # Linux 点文件同步脚本
@@ -90,6 +92,7 @@ dotfile/
 - `git sw <branch>`：切换分支，等价于 `git switch <branch>`
 - `git sc <branch>`：创建并切换到新分支，等价于 `git switch -c <branch>`
 - `git cm`：`git commit`
+- `git cmm "msg"`：快速单行提交，等价于 `git commit -m "msg"`
 - `git br`：`git branch`
 - `git rw <file>`：撤销工作区改动，等价于 `git restore --worktree -- <file>`
 - `git rs <file>`：取消暂存但保留文件改动，等价于 `git restore --staged -- <file>`

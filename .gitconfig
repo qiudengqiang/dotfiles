@@ -2,9 +2,10 @@
 	st = status
 	ss = status --short --branch
 	co = checkout
-	cm = commit -m 
+	cm = commit
+	cmm = commit -m
 	br = branch
-	diff = df
+    df = diff
 	sw = switch
 	sc = switch -c
 	rw = restore --worktree --

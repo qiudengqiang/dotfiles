@@ -16,11 +16,13 @@
 - 登录 iCloud / GitHub
 - 安装 Xcode Command Line Tools（脚本会检测并提示）
 
-## 1. 拉取 dotfile 仓库
+## 1. 拉取 dotfiles 仓库
 ```bash
-git clone <你的仓库地址> ~/workspace/github/dotfile
-cd ~/workspace/github/dotfile
+git clone <你的仓库地址> ~/any/path/dotfiles
+cd ~/any/path/dotfiles
 ```
+
+仓库可以放在任意目录，不要求固定是 `~/workspace/src/dotfiles`。
 
 ## 2. 执行一键恢复
 ```bash

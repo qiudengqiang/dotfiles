@@ -1,6 +1,6 @@
 # Vendored Fonts
 
-This directory vendors the minimal MesloLGL Nerd Font set required by this dotfiles repo.
+This directory vendors the minimal MesloLGL Nerd Font set required by this dotfiles repository.
 
 Included files:
 - `MesloLGLNerdFont-Regular.ttf`

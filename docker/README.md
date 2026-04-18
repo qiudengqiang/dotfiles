@@ -11,12 +11,12 @@
 
 ## 前置条件
 - Docker 或 Docker Desktop 已安装并已启动
-- 仓库在本机：`~/workspace/github/dotfile`
+- 仓库在本机任意目录，例如：`~/any/path/dotfiles`
 - 建议至少预留 10GB 磁盘空间（首次构建或拉取镜像）
 
 ## 一键命令（推荐）
 ```bash
-cd ~/workspace/github/dotfile
+cd ~/any/path/dotfiles
 
 # 本地重建镜像（按架构）
 make build-image-amd64
@@ -65,7 +65,7 @@ make clean
 
 ## 直接 docker 命令（可选）
 ```bash
-cd ~/workspace/github/dotfile
+cd ~/any/path/dotfiles
 
 # 本地构建
 docker buildx build \
